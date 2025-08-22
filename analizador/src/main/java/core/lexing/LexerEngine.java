@@ -56,7 +56,7 @@ public final class LexerEngine {
     private final LineCommentRecognizer lineComment = new LineCommentRecognizer();
     private final BlockCommentRecognizer blockComment = new BlockCommentRecognizer();
 
-    private final StringRecognizer stringRec = new StringRecognizer();
+    private final StringRecognizer stringRec;
     private final DecimalRecognizer decimalRec = new DecimalRecognizer();
     private final NumberRecognizer numberRec = new NumberRecognizer();
     private final IdentifierRecognizer identRec = new IdentifierRecognizer();
@@ -86,6 +86,8 @@ public final class LexerEngine {
         this.operatorRec = new OperatorRecognizer(opTable);
         this.punctuationRec = new PunctuationRecognizer(punctTable);
         this.groupingRec = new GroupingRecognizer(groupTable);
+
+        this.stringRec = new StringRecognizer(config, opTable, punctTable, groupTable);
 
         this.classifier = new TokenClassifier(reserved);
     }
@@ -145,8 +147,13 @@ public final class LexerEngine {
             r = stringRec.recognize(cursor);
             if (r.matched()) {
                 if (r.hasError()) {
-                    errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), "\""));
-                    consume(cursor, r.length());
+                    int consumeLen = r.length();
+                    int lexemeLen = consumeLen;
+                    if (StringRecognizer.MSG_SIMBOLO_INVALIDO.equals(r.errorMessage())) {
+                        lexemeLen = Math.max(0, consumeLen - 1);
+                    }
+                    errors.add(recoveryPolicy.buildLexError(text, startIndex, lexemeLen, pos, r.errorMessage(), r.errorLexeme()));
+                    consume(cursor, consumeLen);
                 } else {
                     String lex = substringSafe(text, startIndex, r.length());
                     tokens.add(new Token(TokenType.STRING, lex, pos));
