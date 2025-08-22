@@ -54,8 +54,6 @@ public final class AlphabetPolicy {
         if (com != null) {
             if (startsWith(cursor, com.getLinea())) return true;
             if (startsWith(cursor, com.getBloqueInicio())) return true;
-            // (bloqueFin no debería iniciar lexema normalmente, pero no hace daño contemplarlo)
-            if (startsWith(cursor, com.getBloqueFin())) return true;
         }
 
         return false;

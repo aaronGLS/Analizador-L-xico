@@ -116,6 +116,15 @@ public final class LexerEngine {
             Position pos = cursor.position();
             int startIndex = cursor.index();
 
+            // Delimitador de cierre de bloque sin apertura
+            String blockEnd = config.getComentarios() != null ? config.getComentarios().getBloqueFin() : null;
+            if (blockEnd != null && startsWith(cursor, blockEnd)) {
+                errors.add(recoveryPolicy.buildLexError(text, startIndex, blockEnd.length(), pos,
+                        "Delimitador de cierre de bloque sin apertura", null));
+                consume(cursor, blockEnd.length());
+                continue;
+            }
+
             // 1) Comentarios (se IGNORAN; solo reportar error si bloque no cierra)
             Recognition r = lineComment.recognize(cursor, config.getComentarios());
             if (r.matched()) {
@@ -235,5 +244,14 @@ public final class LexerEngine {
         int end = Math.max(startIndex, Math.min(text.length(), startIndex + Math.max(0, length)));
         if (startIndex < 0 || startIndex >= text.length() || end <= startIndex) return "";
         return text.substring(startIndex, end);
+    }
+
+    private static boolean startsWith(CharCursor cursor, String s) {
+        if (cursor == null || s == null || s.isEmpty()) return false;
+        for (int i = 0; i < s.length(); i++) {
+            int ch = cursor.peek(i);
+            if (ch == CharCursor.EOF || (char) ch != s.charAt(i)) return false;
+        }
+        return true;
     }
 }
