@@ -1,3 +1,6 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    // Actualiza automáticamente la configuración cuando cambia el pom.xml
+    "java.configuration.updateBuildConfiguration": "automatic",
+    // Importa automáticamente proyectos al abrir la carpeta
+    "java.project.importOnFirstTimeStartup": "automatic"
 }
