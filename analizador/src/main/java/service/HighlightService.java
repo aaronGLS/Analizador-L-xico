@@ -135,8 +135,8 @@ public final class HighlightService {
     }
 
     private static int positionToIndex(int[] lineStarts, Position pos) {
-        int line = pos.line();
-        int col = pos.column();
+        int line = pos.linea();
+        int col = pos.columna();
         if (line < 1 || line > lineStarts.length)
             return 0;
         int base = lineStarts[line - 1];
