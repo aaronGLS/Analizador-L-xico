@@ -2,6 +2,7 @@ C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\le
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\model\config\CommentsConfig.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\model\lexical\Token.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\controller\AnalyzeController.java
+C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\lexing\recognizer\Recognition.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\lexing\stream\CharClasses.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\search\PatternScanner.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\io\ConfigLoader.java
@@ -37,6 +38,7 @@ C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\model\l
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\lexing\policy\ErrorRecoveryPolicy.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\lexing\dfa\DfaBuilder.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\search\SearchEngine.java
+C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\service\StatsService.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\controller\ConfigController.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\model\report\TokenRow.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\io\TextSaver.java
@@ -60,6 +62,7 @@ C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\service
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\view\components\ErrorsTablePanel.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\view\components\TokensTablePanel.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\highlight\ColorPalette.java
+C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\lexing\recognizer\TokenClassifier.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\view\components\LexemeCountTablePanel.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\view\dialogs\ConfigDialog.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\view\table\LexemeCountTableModel.java
