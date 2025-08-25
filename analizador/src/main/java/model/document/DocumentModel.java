@@ -25,8 +25,8 @@ public final class DocumentModel {
     private List<LexError> errors = List.of();
     private SearchResult searchResult;    // última búsqueda realizada
     private GeneralReport generalReport;  // último reporte general generado
+    private boolean dirty;                // indica si hay cambios sin guardar
 
-    /* ======================== texto y archivo ======================== */
 
     public String getText() {
         return text;
@@ -42,6 +42,18 @@ public final class DocumentModel {
 
     public void setFilePath(Path filePath) {
         this.filePath = filePath; // puede ser null para "documento nuevo"
+    }
+
+    /* ======================== estado dirty ========================= */
+
+    /** Indica si el documento tiene cambios no guardados. */
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    /** Ajusta el estado dirty (lo controla el FileController). */
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
     }
 
     /* ======================== tokens y errores ======================= */
