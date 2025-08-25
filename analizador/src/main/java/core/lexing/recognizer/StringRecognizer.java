@@ -6,6 +6,9 @@ import core.lexing.table.OperatorTable;
 import model.config.Config;
 import model.config.CommentsConfig;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Reconocedor de CADENAS entre comillas dobles.
  *
@@ -29,19 +32,24 @@ public final class StringRecognizer {
     private static final String MSG_NO_CERRADA = "Cadena no cerrada";
     public static final String MSG_SIMBOLO_INVALIDO = "Símbolo fuera del alfabeto permitido en cadena";
 
-    private final Config config;
-    private final OperatorTable operators;
-    private final OperatorTable punctuation;
-    private final OperatorTable grouping;
+    private final Set<Character> allowedChars;
 
     public StringRecognizer(Config config,
                              OperatorTable operators,
                              OperatorTable punctuation,
                              OperatorTable grouping) {
-        this.config = config;
-        this.operators = operators;
-        this.punctuation = punctuation;
-        this.grouping = grouping;
+        this.allowedChars = new HashSet<>();
+
+        addCharsFromTable(operators);
+        addCharsFromTable(punctuation);
+        addCharsFromTable(grouping);
+
+        CommentsConfig com = (config != null) ? config.getComentarios() : null;
+        if (com != null) {
+            addCharsFromString(com.getLinea());
+            addCharsFromString(com.getBloqueInicio());
+            addCharsFromString(com.getBloqueFin());
+        }
     }
 
     /**
@@ -84,34 +92,21 @@ public final class StringRecognizer {
         if (CharClasses.isLetter(c) || CharClasses.isDigit(c) || CharClasses.isSpaceOrNewline(c) || CharClasses.isQuote(c)) {
             return true;
         }
-        if (containsChar(operators, c)) return true;
-        if (containsChar(punctuation, c)) return true;
-        if (containsChar(grouping, c)) return true;
-        CommentsConfig com = (config != null) ? config.getComentarios() : null;
-        if (com != null) {
-            if (containsChar(com.getLinea(), c)) return true;
-            if (containsChar(com.getBloqueInicio(), c)) return true;
-            if (containsChar(com.getBloqueFin(), c)) return true;
-        }
-        return false;
+        return allowedChars.contains((char) c);
     }
 
-    private boolean containsChar(OperatorTable table, int c) {
-        if (table == null) return false;
+    private void addCharsFromTable(OperatorTable table) {
+        if (table == null) return;
         for (String s : table.symbols()) {
-            for (int i = 0; i < s.length(); i++) {
-                if (s.charAt(i) == c) return true;
-            }
+            addCharsFromString(s);
         }
-        return false;
     }
 
-    private boolean containsChar(String s, int c) {
-        if (s == null) return false;
+    private void addCharsFromString(String s) {
+        if (s == null) return;
         for (int i = 0; i < s.length(); i++) {
-            if (s.charAt(i) == c) return true;
+            allowedChars.add(s.charAt(i));
         }
-        return false;
     }
 }
 
