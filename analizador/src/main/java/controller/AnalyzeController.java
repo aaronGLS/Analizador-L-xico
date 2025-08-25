@@ -58,9 +58,6 @@ public final class AnalyzeController {
     private final TokensTablePanel tokensPanel;
     private final LexemeCountTablePanel lexemeCountPanel;
     private final GeneralReportPanel generalPanel;
-
-    // Modelos de tabla (persistentes para reutilizar y preservar configuración de
-    // JTable)
     private final ErrorTableModel errorTableModel = new ErrorTableModel();
     private final TokenTableModel tokenTableModel = new TokenTableModel();
     private final LexemeCountTableModel lexemeCountTableModel = new LexemeCountTableModel();
@@ -96,8 +93,6 @@ public final class AnalyzeController {
         this.tokensPanel.setTableModel(tokenTableModel);
         this.lexemeCountPanel.setTableModel(lexemeCountTableModel);
     }
-
-    /* =========================== API pública ============================ */
 
     /**
      * Ejecuta el análisis léxico en background y actualiza los reportes al
@@ -173,8 +168,6 @@ public final class AnalyzeController {
     public void setOnStateChanged(Consumer<AnalysisState> listener) {
         this.onStateChanged = listener;
     }
-
-    /* ======================== Lógica interna UI ========================= */
 
     private void applyWorkerResult(WorkerResult r) {
         boolean hasErrors = !r.errors.isEmpty();
@@ -264,7 +257,6 @@ public final class AnalyzeController {
                 JOptionPane.ERROR_MESSAGE);
     }
 
-    /* ======================= DTO interno del Worker ====================== */
     private static final class WorkerResult {
         final List<model.lexical.LexError> errors;
         // tokens no se usan directamente aquí; se conservan filas procesadas en
