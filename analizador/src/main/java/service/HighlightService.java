@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import core.highlight.ColorPalette;
 import core.lexing.LexerEngine;
 import core.lexing.recognizer.BlockCommentRecognizer;
 import core.lexing.recognizer.LineCommentRecognizer;
@@ -71,7 +72,7 @@ public final class HighlightService {
         for (LexError e : result.errors()) {
             int start = positionToIndex(lineStarts, e.posicion());
             int end = start + e.simboloOCadena().length();
-            spans.add(new HighlightSpan(start, end, COLOR_ERROR));
+            spans.add(new HighlightSpan(start, end, ColorPalette.ERROR));
         }
 
         // 5) Comentarios (no incluidos en tokens)
@@ -92,13 +93,13 @@ public final class HighlightService {
             int start = cursor.index();
             Recognition r = lineComment.recognize(cursor, cfg);
             if (r.matched()) {
-                spans.add(new HighlightSpan(start, start + r.length(), COLOR_COMMENT));
+                spans.add(new HighlightSpan(start, start + r.length(), ColorPalette.COMMENT));
                 consume(cursor, r.length());
                 continue;
             }
             r = blockComment.recognize(cursor, cfg);
             if (r.matched()) {
-                spans.add(new HighlightSpan(start, start + r.length(), COLOR_COMMENT));
+                spans.add(new HighlightSpan(start, start + r.length(), ColorPalette.COMMENT));
                 consume(cursor, r.length());
                 continue;
             }
@@ -145,26 +146,15 @@ public final class HighlightService {
 
     private static Color colorFor(TokenType type) {
         return switch (type) {
-            case RESERVED_WORD -> COLOR_RESERVED;
-            case IDENTIFIER -> COLOR_IDENTIFIER;
-            case NUMBER -> COLOR_NUMBER;
-            case STRING -> COLOR_STRING;
-            case DECIMAL -> COLOR_DECIMAL;
-            case OPERATOR -> COLOR_OPERATOR;
-            case GROUPING -> COLOR_GROUPING;
-            case PUNCTUATION -> COLOR_DECIMAL; // negro
+            case RESERVED_WORD -> ColorPalette.RESERVED;
+            case IDENTIFIER -> ColorPalette.IDENTIFIER;
+            case NUMBER -> ColorPalette.NUMBER;
+            case STRING -> ColorPalette.STRING;
+            case DECIMAL -> ColorPalette.DECIMAL;
+            case OPERATOR -> ColorPalette.OPERATOR;
+            case GROUPING -> ColorPalette.GROUPING;
+            case PUNCTUATION -> ColorPalette.PUNCTUATION;
         };
     }
-
-    // Paleta básica según la guía
-    private static final Color COLOR_RESERVED  = Color.BLUE;
-    private static final Color COLOR_IDENTIFIER = new Color(101, 67, 33); // café
-    private static final Color COLOR_NUMBER    = Color.GREEN;
-    private static final Color COLOR_STRING    = Color.ORANGE;
-    private static final Color COLOR_DECIMAL   = Color.BLACK;
-    private static final Color COLOR_COMMENT   = new Color(0, 100, 0); // verde oscuro
-    private static final Color COLOR_OPERATOR  = Color.YELLOW;
-    private static final Color COLOR_GROUPING  = new Color(128, 0, 128); // morado
-    private static final Color COLOR_ERROR     = Color.RED;
 }
 
