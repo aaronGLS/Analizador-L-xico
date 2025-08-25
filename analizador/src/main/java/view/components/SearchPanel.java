@@ -291,6 +291,27 @@ public class SearchPanel extends javax.swing.JPanel {
         this.onClose = onClose;
     }
 
+    /* ======================= API adicional para SearchController simple ======================= */
+    /**
+     * Renderiza el texto espejo y resalta los rangos entregados.
+     * Si la lista es null o vacía, solo muestra el texto y limpia resaltados.
+     */
+    public void render(String text, java.util.List<model.search.MatchRange> ranges) {
+        setPreviewText(text);
+        clearHighlights();
+        if (ranges == null || ranges.isEmpty()) {
+            setMatchesCount(0);
+            return;
+        }
+        Highlighter.HighlightPainter painter = new javax.swing.text.DefaultHighlighter.DefaultHighlightPainter(new Color(255, 255, 0));
+        for (model.search.MatchRange r : ranges) {
+            int start = r.startIndex();
+            int endExclusive = r.endIndex() + 1; // modelo usa end inclusive
+            addHighlight(start, endExclusive, painter);
+        }
+        setMatchesCount(ranges.size());
+    }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
