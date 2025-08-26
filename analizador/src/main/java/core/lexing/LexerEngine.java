@@ -155,7 +155,7 @@ public final class LexerEngine {
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, lexemeLen, pos, r.errorMessage(), r.errorLexeme()));
                     consume(cursor, consumeLen);
                 } else {
-                    String lex = substringSafe(text, startIndex, r.length());
+                    String lex = buildLexeme(cursor, r.length());
                     tokens.add(new Token(TokenType.STRING, lex, pos));
                     consume(cursor, r.length());
                 }
@@ -169,7 +169,7 @@ public final class LexerEngine {
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), null));
                     consume(cursor, r.length());
                 } else {
-                    String lex = substringSafe(text, startIndex, r.length());
+                    String lex = buildLexeme(cursor, r.length());
                     tokens.add(new Token(TokenType.DECIMAL, lex, pos));
                     consume(cursor, r.length());
                 }
@@ -183,7 +183,7 @@ public final class LexerEngine {
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), null));
                     consume(cursor, r.length());
                 } else {
-                    String lex = substringSafe(text, startIndex, r.length());
+                    String lex = buildLexeme(cursor, r.length());
                     tokens.add(new Token(TokenType.NUMBER, lex, pos));
                     consume(cursor, r.length());
                 }
@@ -193,7 +193,7 @@ public final class LexerEngine {
             // 5) Identificadores / Palabras reservadas
             r = identRec.recognize(cursor);
             if (r.matched()) {
-                String lex = substringSafe(text, startIndex, r.length());
+                String lex = buildLexeme(cursor, r.length());
                 TokenType type = classifier.classifyIdentOrReserved(lex);
                 tokens.add(new Token(type, lex, pos));
                 consume(cursor, r.length());
@@ -203,21 +203,21 @@ public final class LexerEngine {
             // 6) Operadores / Puntuación / Agrupación (greedy longest-first en cada categoría)
             r = operatorRec.recognize(cursor);
             if (r.matched()) {
-                String lex = substringSafe(text, startIndex, r.length());
+                String lex = buildLexeme(cursor, r.length());
                 tokens.add(new Token(TokenType.OPERATOR, lex, pos));
                 consume(cursor, r.length());
                 continue;
             }
             r = punctuationRec.recognize(cursor);
             if (r.matched()) {
-                String lex = substringSafe(text, startIndex, r.length());
+                String lex = buildLexeme(cursor, r.length());
                 tokens.add(new Token(TokenType.PUNCTUATION, lex, pos));
                 consume(cursor, r.length());
                 continue;
             }
             r = groupingRec.recognize(cursor);
             if (r.matched()) {
-                String lex = substringSafe(text, startIndex, r.length());
+                String lex = buildLexeme(cursor, r.length());
                 tokens.add(new Token(TokenType.GROUPING, lex, pos));
                 consume(cursor, r.length());
                 continue;
@@ -225,7 +225,7 @@ public final class LexerEngine {
 
             // 7) Símbolo fuera del alfabeto → error y avanzar 1
             if (!alphabetPolicy.isAllowedAt(cursor, config, opTable, punctTable, groupTable)) {
-                String offending = substringSafe(text, startIndex, 1);
+                String offending = buildLexeme(cursor, 1);
                 errors.add(new LexError(offending, pos, "Símbolo fuera del alfabeto permitido"));
                 consume(cursor, 1);
                 continue;
@@ -247,10 +247,14 @@ public final class LexerEngine {
         }
     }
 
-    private static String substringSafe(String text, int startIndex, int length) {
-        int end = Math.max(startIndex, Math.min(text.length(), startIndex + Math.max(0, length)));
-        if (startIndex < 0 || startIndex >= text.length() || end <= startIndex) return "";
-        return text.substring(startIndex, end);
+    private static String buildLexeme(CharCursor cursor, int len) {
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            int ch = cursor.peek(i);
+            if (ch == CharCursor.EOF) break;
+            sb.append((char) ch);
+        }
+        return sb.toString();
     }
 
     private static boolean startsWith(CharCursor cursor, String s) {
