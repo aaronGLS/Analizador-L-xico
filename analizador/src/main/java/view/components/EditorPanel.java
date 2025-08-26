@@ -5,6 +5,8 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Área de edición principal. Vista pasiva: no hace análisis ni búsqueda; expone
@@ -175,7 +177,8 @@ public class EditorPanel extends javax.swing.JPanel {
         }
         try {
             getStyledDocument().setCharacterAttributes(start, length, attrs, true);
-        } catch (Exception ignored) {
+        } catch (Exception ex) {
+            Logger.getLogger(EditorPanel.class.getName()).log(Level.WARNING, "Error aplicando atributos", ex);
         }
     }
 
@@ -186,7 +189,8 @@ public class EditorPanel extends javax.swing.JPanel {
         try {
             SimpleAttributeSet def = new SimpleAttributeSet();
             getStyledDocument().setCharacterAttributes(0, getDocument().getLength(), def, true);
-        } catch (Exception ignored) {
+        } catch (Exception ex) {
+            Logger.getLogger(EditorPanel.class.getName()).log(Level.WARNING, "Error restableciendo atributos", ex);
         }
     }
 
