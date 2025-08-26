@@ -175,6 +175,31 @@ public final class AnalyzeController {
         this.onStateChanged = listener;
     }
 
+    /** Limpia el modelo de errores. */
+    public void clearErrorTableModel() {
+        errorTableModel.clear();
+    }
+
+    /** Limpia el modelo de tokens. */
+    public void clearTokenTableModel() {
+        tokenTableModel.clear();
+    }
+
+    /** Limpia el modelo de recuento de lexemas. */
+    public void clearLexemeCountTableModel() {
+        lexemeCountTableModel.clear();
+    }
+
+    /** Restablece el panel de reporte general a valores vacíos. */
+    public void resetGeneralReportPanel() {
+        updateGeneralPanelForEmpty();
+    }
+
+    /** Restablece el estado interno a CLEAN sin notificar. */
+    public void resetStateToClean() {
+        this.lastState = AnalysisState.CLEAN;
+    }
+
     private void applyWorkerResult(WorkerResult r) {
         boolean hasErrors = !r.errors.isEmpty();
         // Actualizar tablas según reglas

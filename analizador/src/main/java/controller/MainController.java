@@ -255,9 +255,11 @@ public final class MainController {
 
     private void clearReports() {
         reportsPanel.getErrorsPanel().clearSelection();
-        // Modelos se limpian a través de AnalyzeController si se implementa método
-        // público.
-        // Aquí simplemente limpiamos resaltado y panel general.
+        analyzeController.clearErrorTableModel();
+        analyzeController.clearTokenTableModel();
+        analyzeController.clearLexemeCountTableModel();
+        analyzeController.resetGeneralReportPanel();
+        analyzeController.resetStateToClean();
         editorPanel.resetAttributes();
     }
 
