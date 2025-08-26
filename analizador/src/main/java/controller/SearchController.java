@@ -41,19 +41,20 @@ public class SearchController {
     public void search(String query) {
         String q = (query == null) ? "" : query.trim();
         String text = editorPanel.getEditorText();
+        String normalized = text.replace("\r\n", "\n").replace('\r', '\n');
 
         if (q.isEmpty()) {
-            clearResults(text);
+            clearResults(normalized);
             return;
         }
 
         try {
             boolean ignoreCase = searchPanel.isIgnoreCaseSelected();
             boolean wholeWord = searchPanel.isWholeWordSelected();
-            SearchResult result = searchService.findAll(text, q, !ignoreCase, wholeWord);
+            SearchResult result = searchService.findAll(normalized, q, !ignoreCase, wholeWord);
             List<MatchRange> ranges = result.matches();
             // Render en el panel de búsqueda (área nueva), no tocar el editor
-            searchPanel.render(text, ranges);
+            searchPanel.render(normalized, ranges);
 
             if (ranges == null || ranges.isEmpty()) {
                 JOptionPane.showMessageDialog(null,
@@ -74,7 +75,8 @@ public class SearchController {
      */
     public void clear() {
         String text = editorPanel.getEditorText();
-        clearResults(text);
+        String normalized = text.replace("\r\n", "\n").replace('\r', '\n');
+        clearResults(normalized);
     }
 
     // --------------------------------------------------------------
