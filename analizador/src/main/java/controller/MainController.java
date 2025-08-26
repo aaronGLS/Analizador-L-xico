@@ -11,8 +11,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.Utilities;
 
 import core.io.ConfigLoader;
 import core.io.ConfigSaver;
@@ -229,19 +232,14 @@ public final class MainController {
 
     private void updateCaretPosition() {
         int pos = editorPanel.getEditorPane().getCaretPosition();
-        String text = editorPanel.getEditorText();
-        int line = 1, col = 1;
-        for (int i = 0, c = 0; i < text.length() && i < pos; i++) {
-            char ch = text.charAt(i);
-            if (ch == '\n') {
-                line++;
-                c = 0;
-            } else {
-                c++;
-            }
-            col = c + 1;
+        Document doc = editorPanel.getDocument();
+        try {
+            int line = doc.getDefaultRootElement().getElementIndex(pos) + 1;
+            int col = pos - Utilities.getRowStart(editorPanel.getEditorPane(), pos) + 1;
+            editorPanel.setStatusPositionText("Línea: " + line + " Columna: " + col);
+        } catch (BadLocationException e) {
+            editorPanel.setStatusPositionText("Línea: - Columna: -");
         }
-        editorPanel.setStatusPositionText("Línea: " + line + " Columna: " + col);
     }
 
     /* ===================== Acciones de alto nivel ===================== */
