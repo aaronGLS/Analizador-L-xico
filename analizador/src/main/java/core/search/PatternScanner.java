@@ -19,10 +19,11 @@ public final class PatternScanner {
      * @param text          texto donde buscar (no null)
      * @param pattern       patrón a buscar (no null ni vacío)
      * @param caseSensitive true = sensible a mayúsculas/minúsculas
+     * @param wholeWord     true = coincide solo palabras completas
      * @return lista de pares [startIndex, length] para cada coincidencia
      * @throws IllegalArgumentException si pattern es null o vacío
      */
-    public static List<int[]> findAll(String text, String pattern, boolean caseSensitive) {
+    public static List<int[]> findAll(String text, String pattern, boolean caseSensitive, boolean wholeWord) {
         if (pattern == null || pattern.isEmpty()) {
             throw new IllegalArgumentException("El patrón de búsqueda no puede ser null ni vacío.");
         }
@@ -44,9 +45,20 @@ public final class PatternScanner {
                 j++;
             }
             if (j == m) {
+                if (wholeWord) {
+                    boolean leftOk = (i == 0) || !isWordChar(text.charAt(i - 1));
+                    boolean rightOk = (i + m >= n) || !isWordChar(text.charAt(i + m));
+                    if (!(leftOk && rightOk)) {
+                        continue;
+                    }
+                }
                 res.add(new int[]{i, m});
             }
         }
         return res;
+    }
+
+    private static boolean isWordChar(char c) {
+        return Character.isLetterOrDigit(c) || c == '_';
     }
 }

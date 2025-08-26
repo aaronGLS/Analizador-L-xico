@@ -23,6 +23,7 @@ public final class SearchService {
      * @param doc             modelo del documento (no null)
      * @param pattern         patrón a buscar (no null ni vacío)
      * @param caseSensitive   true para respetar mayúsculas/minúsculas
+     * @param wholeWord       true para coincidir solo palabras completas
      * @param includeComments true para incluir coincidencias dentro de comentarios
      * @param config          configuración dinámica (se usa si
      *                        includeComments=false)
@@ -31,12 +32,13 @@ public final class SearchService {
     public SearchResult search(DocumentModel doc,
             String pattern,
             boolean caseSensitive,
+            boolean wholeWord,
             boolean includeComments,
             Config config) {
         Objects.requireNonNull(doc, "doc no puede ser null");
         String text = Objects.requireNonNull(doc.getText(), "El texto del documento no puede ser null");
 
-        SearchResult res = engine.search(text, pattern, caseSensitive, includeComments, config);
+        SearchResult res = engine.search(text, pattern, caseSensitive, wholeWord, includeComments, config);
         doc.setSearchResult(res);
         return res;
     }
@@ -49,12 +51,13 @@ public final class SearchService {
      * SIN excluir comentarios (no hay Config disponible aquí). Si se requiere más
      * control,
      * usar el método
-     * {@link #search(DocumentModel, String, boolean, boolean, Config)}.
+     * {@link #search(DocumentModel, String, boolean, boolean, boolean, Config)}.
      */
-    public SearchResult findAll(String text, String pattern) {
+    public SearchResult findAll(String text, String pattern, boolean caseSensitive, boolean wholeWord) {
         return engine.search(Objects.requireNonNull(text, "text"),
                 Objects.requireNonNull(pattern, "pattern"),
-                true, // caseSensitive por defecto
+                caseSensitive,
+                wholeWord,
                 true, // includeComments por defecto
                 null // no config necesaria
         );

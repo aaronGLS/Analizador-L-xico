@@ -35,6 +35,7 @@ public final class SearchEngine {
      * @param text            texto donde buscar (no null)
      * @param pattern         patrón a buscar (no null ni vacío)
      * @param caseSensitive   true para respetar mayúsculas/minúsculas
+     * @param wholeWord       true para coincidir solo palabras completas
      * @param includeComments true para incluir coincidencias dentro de comentarios;
      *                        false para excluirlas (si hay config de comentarios)
      * @param config          configuración (se usa solo si includeComments=false; puede ser null)
@@ -43,6 +44,7 @@ public final class SearchEngine {
     public SearchResult search(String text,
                                String pattern,
                                boolean caseSensitive,
+                               boolean wholeWord,
                                boolean includeComments,
                                Config config) {
         Objects.requireNonNull(text, "El texto no puede ser null.");
@@ -58,7 +60,7 @@ public final class SearchEngine {
         boolean[] inComment = includeComments ? null : buildCommentMask(text, (config != null) ? config.getComentarios() : null);
 
         // 3) Buscar todas las coincidencias (índices y longitudes)
-        List<int[]> spans = PatternScanner.findAll(text, pattern, caseSensitive);
+        List<int[]> spans = PatternScanner.findAll(text, pattern, caseSensitive, wholeWord);
 
         // 4) Filtrar por comentarios (si corresponde) y construir rangos con posiciones
         var ranges = new ArrayList<MatchRange>(spans.size());

@@ -48,8 +48,9 @@ public class SearchController {
         }
 
         try {
-            // Nuevo: usar API extendida del SearchService (findAll "raw" texto)
-            SearchResult result = searchService.findAll(text, q);
+            boolean ignoreCase = searchPanel.isIgnoreCaseSelected();
+            boolean wholeWord = searchPanel.isWholeWordSelected();
+            SearchResult result = searchService.findAll(text, q, !ignoreCase, wholeWord);
             List<MatchRange> ranges = result.matches();
             // Render en el panel de búsqueda (área nueva), no tocar el editor
             searchPanel.render(text, ranges);
