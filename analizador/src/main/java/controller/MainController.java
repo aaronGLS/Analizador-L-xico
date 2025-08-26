@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.event.CaretListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -197,6 +198,8 @@ public final class MainController {
      */
     private void installEditorListeners() {
         // Dirty + stats
+        final Timer highlightTimer = new Timer(300, e -> highlightEditor());
+        highlightTimer.setRepeats(false);
         editorPanel.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -216,6 +219,7 @@ public final class MainController {
             private void onChange() {
                 fileController.markDirtyFromEditorChange();
                 updateStats();
+                highlightTimer.restart();
             }
         });
         // Caret -> posición línea/columna
