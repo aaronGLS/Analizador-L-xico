@@ -30,11 +30,9 @@ public class EditorPanel extends javax.swing.JPanel {
      * Ajustes de UI posteriores al initComponents()
      */
     private void postInitConfigure() {
-        // Fuente monoespaciada ya definida en el diseñador; asegurar texto plano
-        try {
-            txtEditor.setContentType("text/plain");
-        } catch (Exception ignored) {
-        }
+        // Fuente monoespaciada ya definida en el diseñador; usar documento estilado
+        txtEditor.setEditorKit(new StyledEditorKit());
+        txtEditor.setDocument(new DefaultStyledDocument());
         txtEditor.setCaretPosition(0);
         txtEditor.setDragEnabled(true);
         scrollEditor.setWheelScrollingEnabled(true);
