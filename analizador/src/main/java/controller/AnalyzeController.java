@@ -17,7 +17,6 @@ import view.components.GeneralReportPanel;
 import view.table.ErrorTableModel;
 import view.table.TokenTableModel;
 import view.table.LexemeCountTableModel;
-
 import javax.swing.*;
 import java.awt.Cursor;
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ import java.util.function.Consumer;
  */
 public final class AnalyzeController {
 
-    /* ======================= Estado & dependencias ======================= */
     public enum AnalysisState {
         WITH_ERRORS, CLEAN
     }
