@@ -23,11 +23,11 @@ import core.lexing.table.ReservedWords;
  *    operadores, puntuación y agrupación).
  *  - Aplicar la política de alfabeto para reportar símbolos fuera de alfabeto.
  *  - Aplicar la política de recuperación de errores: emitir LexError y continuar.
- *  - Generar tokens con tipo, lexema exacto y posición 1-based del inicio del lexema.
+ *  - Generar tokens con tipo (incluyendo COMMENT y ERROR), lexema exacto y
+ *    posición 1-based del inicio del lexema.
  *
  * Restricciones:
  *  - Trabaja únicamente con CharCursor (peek/next), sin regex ni utilidades de cadena avanzadas.
- *  - Los comentarios se IGNORAN durante el análisis (no se emiten como tokens).
  */
 public final class LexerEngine {
 
@@ -121,8 +121,10 @@ public final class LexerEngine {
             // Delimitador de cierre de bloque sin apertura
             String blockEnd = config.getComentarios() != null ? config.getComentarios().getBloqueFin() : null;
             if (blockEnd != null && startsWith(cursor, blockEnd)) {
+                String lex = substringSafe(text, startIndex, blockEnd.length());
                 errors.add(recoveryPolicy.buildLexError(text, startIndex, blockEnd.length(), pos,
                         "Delimitador de cierre de bloque sin apertura", null));
+                tokens.add(new Token(TokenType.ERROR, lex, pos));
                 consume(cursor, blockEnd.length());
                 continue;
             }
@@ -130,14 +132,20 @@ public final class LexerEngine {
             // 1) Comentarios (se IGNORAN; solo reportar error si bloque no cierra)
             Recognition r = lineComment.recognize(cursor, config.getComentarios());
             if (r.matched()) {
+                String lex = substringSafe(text, startIndex, r.length());
+                tokens.add(new Token(TokenType.COMMENT, lex, pos));
                 consume(cursor, r.length());
                 continue;
             }
             r = blockComment.recognize(cursor, config.getComentarios());
             if (r.matched()) {
+                String lex = substringSafe(text, startIndex, r.length());
                 if (r.hasError()) {
                     // Error: comentario de bloque no cerrado (consume hasta EOF según reconocedor)
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), r.errorLexeme()));
+                    tokens.add(new Token(TokenType.ERROR, lex, pos));
+                } else {
+                    tokens.add(new Token(TokenType.COMMENT, lex, pos));
                 }
                 consume(cursor, r.length());
                 continue;
@@ -152,7 +160,9 @@ public final class LexerEngine {
                     if (StringRecognizer.MSG_SIMBOLO_INVALIDO.equals(r.errorMessage())) {
                         lexemeLen = Math.max(0, consumeLen - 1);
                     }
+                    String lex = substringSafe(text, startIndex, lexemeLen);
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, lexemeLen, pos, r.errorMessage(), r.errorLexeme()));
+                    tokens.add(new Token(TokenType.ERROR, lex, pos));
                     consume(cursor, consumeLen);
                 } else {
                     String lex = substringSafe(text, startIndex, r.length());
@@ -166,7 +176,9 @@ public final class LexerEngine {
             r = decimalRec.recognize(cursor);
             if (r.matched()) {
                 if (r.hasError()) {
+                    String lex = substringSafe(text, startIndex, r.length());
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), null));
+                    tokens.add(new Token(TokenType.ERROR, lex, pos));
                     consume(cursor, r.length());
                 } else {
                     String lex = substringSafe(text, startIndex, r.length());
@@ -180,7 +192,9 @@ public final class LexerEngine {
             r = numberRec.recognize(cursor);
             if (r.matched()) {
                 if (r.hasError()) {
+                    String lex = substringSafe(text, startIndex, r.length());
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), null));
+                    tokens.add(new Token(TokenType.ERROR, lex, pos));
                     consume(cursor, r.length());
                 } else {
                     String lex = substringSafe(text, startIndex, r.length());
@@ -227,6 +241,7 @@ public final class LexerEngine {
             if (!alphabetPolicy.isAllowedAt(cursor, config, opTable, punctTable, groupTable)) {
                 String offending = substringSafe(text, startIndex, 1);
                 errors.add(new LexError(offending, pos, "Símbolo fuera del alfabeto permitido"));
+                tokens.add(new Token(TokenType.ERROR, offending, pos));
                 consume(cursor, 1);
                 continue;
             }

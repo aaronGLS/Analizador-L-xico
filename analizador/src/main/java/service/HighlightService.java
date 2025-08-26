@@ -8,12 +8,7 @@ import java.util.Objects;
 
 import core.highlight.ColorPalette;
 import core.lexing.LexerEngine;
-import core.lexing.recognizer.BlockCommentRecognizer;
-import core.lexing.recognizer.LineCommentRecognizer;
-import core.lexing.recognizer.Recognition;
-import core.lexing.stream.CharCursor;
 import model.config.Config;
-import model.lexical.LexError;
 import model.lexical.Position;
 import model.lexical.Token;
 import model.lexical.TokenType;
@@ -21,8 +16,8 @@ import model.lexical.TokenType;
 /**
  * Servicio responsable de generar las instrucciones de coloreo
  * (resaltado) para el texto de entrada.  Utiliza el {@link LexerEngine}
- * para obtener tokens y errores, y escanea manualmente los comentarios
- * para pintarlos con color especial.
+ * para obtener tokens (incluyendo comentarios y errores) y generar
+ * instrucciones de coloreo.
  */
 public final class HighlightService {
 
@@ -36,8 +31,6 @@ public final class HighlightService {
     }
 
     private final Config config;
-    private final LineCommentRecognizer lineComment = new LineCommentRecognizer();
-    private final BlockCommentRecognizer blockComment = new BlockCommentRecognizer();
 
     public HighlightService(Config config) {
         this.config = Objects.requireNonNull(config, "config no puede ser null");
@@ -55,7 +48,7 @@ public final class HighlightService {
         // Normalizar saltos de línea para tratar CR, LF y CRLF como '\n'
         String normalized = text.replace("\r\n", "\n").replace('\r', '\n');
 
-        // 1) Analizar texto para obtener tokens y errores
+        // 1) Analizar texto para obtener tokens (incluyen comentarios y errores)
         var lexer = new LexerEngine(config);
         var result = lexer.analyze(normalized);
 
@@ -64,55 +57,17 @@ public final class HighlightService {
 
         List<HighlightSpan> spans = new ArrayList<>();
 
-        // 3) Tokens válidos
+        // 3) Tokens
         for (Token t : result.tokens()) {
             int start = positionToIndex(lineStarts, t.posicion());
             int end = start + t.lexema().length();
             spans.add(new HighlightSpan(start, end, colorFor(t.tipo())));
         }
 
-        // 4) Errores léxicos
-        for (LexError e : result.errors()) {
-            int start = positionToIndex(lineStarts, e.posicion());
-            int end = start + e.simboloOCadena().length();
-            spans.add(new HighlightSpan(start, end, ColorPalette.ERROR));
-        }
-
-        // 5) Comentarios (no incluidos en tokens)
-        markComments(normalized, spans);
-
         return Collections.unmodifiableList(spans);
     }
 
     /* ===================== helpers internos ===================== */
-
-    private void markComments(String text, List<HighlightSpan> spans) {
-        var cfg = config.getComentarios();
-        if (cfg == null)
-            return;
-
-        var cursor = new CharCursor(text);
-        while (!cursor.eof()) {
-            int start = cursor.index();
-            Recognition r = lineComment.recognize(cursor, cfg);
-            if (r.matched()) {
-                spans.add(new HighlightSpan(start, start + r.length(), ColorPalette.COMMENT));
-                consume(cursor, r.length());
-                continue;
-            }
-            r = blockComment.recognize(cursor, cfg);
-            if (r.matched()) {
-                spans.add(new HighlightSpan(start, start + r.length(), ColorPalette.COMMENT));
-                consume(cursor, r.length());
-                continue;
-            }
-            cursor.next();
-        }
-    }
-
-    private static void consume(CharCursor cursor, int len) {
-        for (int i = 0; i < len && !cursor.eof(); i++) cursor.next();
-    }
 
     private static int[] computeLineStarts(String text) {
         int n = text.length();
@@ -157,6 +112,8 @@ public final class HighlightService {
             case OPERATOR -> ColorPalette.OPERATOR;
             case GROUPING -> ColorPalette.GROUPING;
             case PUNCTUATION -> ColorPalette.PUNCTUATION;
+            case COMMENT -> ColorPalette.COMMENT;
+            case ERROR -> ColorPalette.ERROR;
         };
     }
 }

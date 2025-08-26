@@ -21,7 +21,6 @@ import model.lexical.Token;
  *
  * Restricciones:
  *  - No realiza coloreo, reportes ni exportaciones (eso se implementa en otras capas).
- *  - No altera el comportamiento del lexer (comentarios se ignoran en la salida).
  */
 public final class AnalyzeService {
 
