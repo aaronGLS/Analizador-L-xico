@@ -69,7 +69,8 @@ public final class MainController {
     private final FileController fileController = new FileController(
             mainWindow, editorPanel, documentModel, textLoader, textSaver);
     private final AnalyzeController analyzeController = new AnalyzeController(
-            editorPanel, reportsPanel, config, analyzeService, reportBuilder, gradingService, notUsedCalculator);
+            editorPanel, reportsPanel, documentModel, config, analyzeService, reportBuilder, gradingService,
+            notUsedCalculator);
     private final ExportController exportController = new ExportController(
             mainWindow, editorPanel, reportsPanel.getErrorsPanel(), reportsPanel.getTokensPanel(),
             reportsPanel.getLexemeCountPanel());

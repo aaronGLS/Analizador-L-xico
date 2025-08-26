@@ -6,6 +6,7 @@ import service.GradingService;
 import service.NotUsedCalculator; // (inyectado por requisito aunque GradingService tenga uno interno)
 
 import model.config.Config;
+import model.document.DocumentModel;
 import model.report.GeneralReport;
 
 import view.components.EditorPanel;
@@ -46,6 +47,7 @@ public final class AnalyzeController {
     private final EditorPanel editorPanel;
     private final ReportsPanel reportsPanel;
     private final Config config; // Configuración viva (se modifica en ConfigDialog)
+    private final DocumentModel documentModel;
     private final AnalyzeService analyzeService;
     private final ReportBuilder reportBuilder;
     private final GradingService gradingService;
@@ -67,6 +69,7 @@ public final class AnalyzeController {
 
     public AnalyzeController(EditorPanel editorPanel,
             ReportsPanel reportsPanel,
+            DocumentModel documentModel,
             Config config,
             AnalyzeService analyzeService,
             ReportBuilder reportBuilder,
@@ -74,6 +77,7 @@ public final class AnalyzeController {
             NotUsedCalculator notUsedCalculator) {
         this.editorPanel = Objects.requireNonNull(editorPanel, "editorPanel");
         this.reportsPanel = Objects.requireNonNull(reportsPanel, "reportsPanel");
+        this.documentModel = Objects.requireNonNull(documentModel, "documentModel");
         this.config = Objects.requireNonNull(config, "config");
         this.analyzeService = Objects.requireNonNull(analyzeService, "analyzeService");
         this.reportBuilder = Objects.requireNonNull(reportBuilder, "reportBuilder");
@@ -132,10 +136,14 @@ public final class AnalyzeController {
                         showErrorDialog("Error durante el análisis: " + result.failure.getMessage());
                         clearDataModels();
                         updateGeneralPanelForEmpty();
+                        documentModel.clearAnalysis();
                         // No notificar cambio de estado (se mantiene previous)
                         return;
                     }
                     applyWorkerResult(result);
+                    documentModel.setTokens(result.tokens);
+                    documentModel.setErrors(result.errors);
+                    documentModel.setGeneralReport(result.generalReport);
                 } catch (Exception e) {
                     showErrorDialog("Fallo inesperado al obtener resultado: " + e.getMessage());
                 } finally {
@@ -257,8 +265,7 @@ public final class AnalyzeController {
 
     private static final class WorkerResult {
         final List<model.lexical.LexError> errors;
-        // tokens no se usan directamente aquí; se conservan filas procesadas en
-        // builderResult.
+        final List<model.lexical.Token> tokens;
         final ReportBuilder.Result builderResult;
         final GeneralReport generalReport;
         final Exception failure;
@@ -268,6 +275,7 @@ public final class AnalyzeController {
                 ReportBuilder.Result builderResult,
                 GeneralReport generalReport) {
             this.errors = errors;
+            this.tokens = tokens;
             this.builderResult = builderResult;
             this.generalReport = generalReport;
             this.failure = null;
@@ -275,6 +283,7 @@ public final class AnalyzeController {
 
         WorkerResult(Exception failure) {
             this.errors = List.of();
+            this.tokens = List.of();
             this.builderResult = null; // no se puede instanciar directamente (constructor privado)
             this.generalReport = null;
             this.failure = failure;
