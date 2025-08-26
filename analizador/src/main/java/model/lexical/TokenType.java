@@ -12,6 +12,8 @@ package model.lexical;
  *  - PUNCTUATION: signo de puntuación definido en config.json.
  *  - OPERATOR: operador aritmético definido en config.json.
  *  - GROUPING: signo de agrupación definido en config.json.
+ *  - COMMENT: comentario de línea o bloque según config.json.
+ *  - ERROR: fragmento que produjo un error léxico.
  */
 public enum TokenType {
     IDENTIFIER,
@@ -21,5 +23,7 @@ public enum TokenType {
     RESERVED_WORD,
     PUNCTUATION,
     OPERATOR,
-    GROUPING
+    GROUPING,
+    COMMENT,
+    ERROR
 }
