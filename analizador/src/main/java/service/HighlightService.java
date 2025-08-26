@@ -52,12 +52,15 @@ public final class HighlightService {
     public List<HighlightSpan> highlight(String text) {
         Objects.requireNonNull(text, "text no puede ser null");
 
+        // Normalizar saltos de línea para tratar CR, LF y CRLF como '\n'
+        String normalized = text.replace("\r\n", "\n").replace('\r', '\n');
+
         // 1) Analizar texto para obtener tokens y errores
         var lexer = new LexerEngine(config);
-        var result = lexer.analyze(text);
+        var result = lexer.analyze(normalized);
 
         // 2) Precalcular inicios de línea para traducir Position -> índice
-        int[] lineStarts = computeLineStarts(text);
+        int[] lineStarts = computeLineStarts(normalized);
 
         List<HighlightSpan> spans = new ArrayList<>();
 
@@ -76,7 +79,7 @@ public final class HighlightService {
         }
 
         // 5) Comentarios (no incluidos en tokens)
-        markComments(text, spans);
+        markComments(normalized, spans);
 
         return Collections.unmodifiableList(spans);
     }
