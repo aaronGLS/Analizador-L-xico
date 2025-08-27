@@ -226,6 +226,15 @@ public final class MainController {
                 fileController.markDirtyFromEditorChange();
                 updateStats();
                 highlightTimer.restart();
+                // Evitar resultados desactualizados en el panel de búsqueda:
+                // si el usuario modifica el texto base y hay una consulta activa,
+                // limpiar el panel de resultados (misma política que cuando la query está vacía).
+                if (mainWindow.isSearchPanelVisible()) {
+                    String q = searchPanel.getQueryText();
+                    if (q != null && !q.trim().isEmpty()) {
+                        searchController.clear();
+                    }
+                }
             }
         });
         // Caret -> posición línea/columna

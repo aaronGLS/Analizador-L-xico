@@ -16,13 +16,14 @@ import java.util.Objects;
  * Motor de búsqueda de patrones con conversión a posiciones (línea/columna).
  *
  * Funcionalidad:
- *  - Busca un patrón (char-a-char, sin regex) con sensibilidad opcional.
- *  - Opcionalmente excluye coincidencias dentro de comentarios (línea/bloque)
- *    según la configuración (config.json).
- *  - Calcula posiciones 1-based para inicio y fin de cada coincidencia,
- *    tratando CR, LF y CRLF como saltos de línea válidos.
+ * - Busca un patrón (char-a-char, sin regex) con sensibilidad opcional.
+ * - Opcionalmente excluye coincidencias dentro de comentarios (línea/bloque)
+ * según la configuración (config.json).
+ * - Calcula posiciones 1-based para inicio y fin de cada coincidencia,
+ * tratando CR, LF y CRLF como saltos de línea válidos.
  *
- * Sin UI, sin coloreo: este motor provee datos para que la capa de vista resalte.
+ * Sin UI, sin coloreo: este motor provee datos para que la capa de vista
+ * resalte.
  */
 public final class SearchEngine {
 
@@ -38,15 +39,16 @@ public final class SearchEngine {
      * @param wholeWord       true para coincidir solo palabras completas
      * @param includeComments true para incluir coincidencias dentro de comentarios;
      *                        false para excluirlas (si hay config de comentarios)
-     * @param config          configuración (se usa solo si includeComments=false; puede ser null)
+     * @param config          configuración (se usa solo si includeComments=false;
+     *                        puede ser null)
      * @return SearchResult con rangos y posiciones de cada coincidencia
      */
     public SearchResult search(String text,
-                               String pattern,
-                               boolean caseSensitive,
-                               boolean wholeWord,
-                               boolean includeComments,
-                               Config config) {
+            String pattern,
+            boolean caseSensitive,
+            boolean wholeWord,
+            boolean includeComments,
+            Config config) {
         Objects.requireNonNull(text, "El texto no puede ser null.");
         Objects.requireNonNull(pattern, "El patrón no puede ser null.");
         if (pattern.isEmpty()) {
@@ -57,24 +59,25 @@ public final class SearchEngine {
         int[] lineStarts = computeLineStarts(text);
 
         // 2) Si se deben excluir comentarios, construir la máscara de comentarios
-        boolean[] inComment = includeComments ? null : buildCommentMask(text, (config != null) ? config.getComentarios() : null);
+        boolean[] inComment = includeComments ? null
+                : buildCommentMask(text, (config != null) ? config.getComentarios() : null);
 
         // 3) Buscar todas las coincidencias (índices y longitudes)
-        List<int[]> spans = PatternScanner.findAll(text, pattern, caseSensitive, wholeWord);
+        List<int[]> spans = PatternScanner.findAllCodePoints(text, pattern, caseSensitive, wholeWord);
 
         // 4) Filtrar por comentarios (si corresponde) y construir rangos con posiciones
         var ranges = new ArrayList<MatchRange>(spans.size());
         for (int[] sp : spans) {
             int start = sp[0];
-            int len   = sp[1];
-            int end   = start + len - 1;
+            int len = sp[1];
+            int end = start + len - 1;
 
             if (inComment != null && overlapsComment(inComment, start, end)) {
                 continue; // excluir coincidencias dentro de comentarios
             }
 
             Position pStart = indexToPosition(lineStarts, start);
-            Position pEnd   = indexToPosition(lineStarts, end);
+            Position pEnd = indexToPosition(lineStarts, end);
             ranges.add(new MatchRange(start, end, pStart, pEnd));
         }
 
@@ -83,7 +86,10 @@ public final class SearchEngine {
 
     /* ---------------------- utilitarios internos ---------------------- */
 
-    /** Construye arreglo de inicios de línea (0-based) tratando CR/LF/CRLF como saltos. */
+    /**
+     * Construye arreglo de inicios de línea (0-based) tratando CR/LF/CRLF como
+     * saltos.
+     */
     private static int[] computeLineStarts(String text) {
         // Peor caso: cada carácter inicia una línea => tamaño = length + 1
         int n = text.length();
@@ -126,18 +132,25 @@ public final class SearchEngine {
         while (lo <= hi) {
             int mid = (lo + hi) >>> 1;
             int v = lineStarts[mid];
-            if (v == index) return mid;
-            if (v < index) lo = mid + 1;
-            else hi = mid - 1;
+            if (v == index)
+                return mid;
+            if (v < index)
+                lo = mid + 1;
+            else
+                hi = mid - 1;
         }
         return Math.max(0, lo - 1);
     }
 
-    /** Construye una máscara booleana donde {@code true} indica "posición dentro de comentario". */
+    /**
+     * Construye una máscara booleana donde {@code true} indica "posición dentro de
+     * comentario".
+     */
     private boolean[] buildCommentMask(String text, CommentsConfig cfg) {
         int n = text.length();
         boolean[] mask = new boolean[n];
-        if (cfg == null) return mask;
+        if (cfg == null)
+            return mask;
 
         var cursor = new CharCursor(text);
         while (!cursor.eof()) {
@@ -164,7 +177,9 @@ public final class SearchEngine {
         return mask;
     }
 
-    /** Marca en 'mask' el intervalo [start, start+length) como dentro de comentario. */
+    /**
+     * Marca en 'mask' el intervalo [start, start+length) como dentro de comentario.
+     */
     private static void mark(boolean[] mask, int start, int length) {
         int n = mask.length;
         int end = Math.min(n, start + Math.max(0, length));
@@ -179,12 +194,14 @@ public final class SearchEngine {
         int a = Math.max(0, start);
         int b = Math.min(n - 1, end);
         for (int i = a; i <= b; i++) {
-            if (mask[i]) return true;
+            if (mask[i])
+                return true;
         }
         return false;
     }
 
     private static void consume(CharCursor cursor, int length) {
-        for (int i = 0; i < length && !cursor.eof(); i++) cursor.next();
+        for (int i = 0; i < length && !cursor.eof(); i++)
+            cursor.next();
     }
 }
