@@ -98,15 +98,27 @@ public class ConfigController {
     private void attachListHandlers(ConfigDialog dialog) {
         dialog.setOnAddReservada(() -> addItem(dialog.getLstReservadas(), "palabra reservada", dialog));
         dialog.setOnEditReservada(() -> editItem(dialog.getLstReservadas(), "palabra reservada", dialog));
+        dialog.setOnRemoveReservada(() -> removeItem(dialog.getLstReservadas()));
+        dialog.setOnUpReservada(() -> moveUp(dialog.getLstReservadas()));
+        dialog.setOnDownReservada(() -> moveDown(dialog.getLstReservadas()));
 
         dialog.setOnAddOperador(() -> addItem(dialog.getLstOperadores(), "operador", dialog));
         dialog.setOnEditOperador(() -> editItem(dialog.getLstOperadores(), "operador", dialog));
+        dialog.setOnRemoveOperador(() -> removeItem(dialog.getLstOperadores()));
+        dialog.setOnUpOperador(() -> moveUp(dialog.getLstOperadores()));
+        dialog.setOnDownOperador(() -> moveDown(dialog.getLstOperadores()));
 
         dialog.setOnAddPuntuacion(() -> addItem(dialog.getLstPuntuacion(), "símbolo de puntuación", dialog));
         dialog.setOnEditPuntuacion(() -> editItem(dialog.getLstPuntuacion(), "símbolo de puntuación", dialog));
+        dialog.setOnRemovePuntuacion(() -> removeItem(dialog.getLstPuntuacion()));
+        dialog.setOnUpPuntuacion(() -> moveUp(dialog.getLstPuntuacion()));
+        dialog.setOnDownPuntuacion(() -> moveDown(dialog.getLstPuntuacion()));
 
         dialog.setOnAddAgrupacion(() -> addItem(dialog.getLstAgrupacion(), "símbolo de agrupación", dialog));
         dialog.setOnEditAgrupacion(() -> editItem(dialog.getLstAgrupacion(), "símbolo de agrupación", dialog));
+        dialog.setOnRemoveAgrupacion(() -> removeItem(dialog.getLstAgrupacion()));
+        dialog.setOnUpAgrupacion(() -> moveUp(dialog.getLstAgrupacion()));
+        dialog.setOnDownAgrupacion(() -> moveDown(dialog.getLstAgrupacion()));
     }
 
     /** Añade un nuevo ítem a la lista verificando duplicados. */
@@ -138,6 +150,42 @@ public class ConfigController {
         }
         model.set(idx, value);
         list.setSelectedIndex(idx);
+    }
+
+    /** Elimina el elemento seleccionado de la lista. */
+    private void removeItem(JList<String> list) {
+        int idx = list.getSelectedIndex();
+        if (idx < 0) return;
+        DefaultListModel<String> model = (DefaultListModel<String>) list.getModel();
+        model.remove(idx);
+        if (idx >= model.getSize()) {
+            idx = model.getSize() - 1;
+        }
+        if (idx >= 0) {
+            list.setSelectedIndex(idx);
+        }
+    }
+
+    /** Mueve el elemento seleccionado una posición hacia arriba. */
+    private void moveUp(JList<String> list) {
+        int idx = list.getSelectedIndex();
+        if (idx <= 0) return;
+        DefaultListModel<String> model = (DefaultListModel<String>) list.getModel();
+        String val = model.get(idx);
+        model.remove(idx);
+        model.add(idx - 1, val);
+        list.setSelectedIndex(idx - 1);
+    }
+
+    /** Mueve el elemento seleccionado una posición hacia abajo. */
+    private void moveDown(JList<String> list) {
+        DefaultListModel<String> model = (DefaultListModel<String>) list.getModel();
+        int idx = list.getSelectedIndex();
+        if (idx < 0 || idx >= model.getSize() - 1) return;
+        String val = model.get(idx);
+        model.remove(idx);
+        model.add(idx + 1, val);
+        list.setSelectedIndex(idx + 1);
     }
 
     /** Diálogo genérico para ingresar un valor. */
