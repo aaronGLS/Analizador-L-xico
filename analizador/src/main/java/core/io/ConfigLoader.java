@@ -3,11 +3,14 @@ package core.io;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import model.config.Config;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Cargador de la configuración desde un archivo JSON (config.json).
@@ -31,8 +34,34 @@ public final class ConfigLoader {
             if (cfg == null) {
                 throw new IllegalArgumentException("El archivo de configuración está vacío o es inválido.");
             }
-            cfg.validate(); 
+
+            cfg.setPalabrasReservadas(normalizeSet(cfg.getPalabrasReservadas(), "palabrasReservadas"));
+            cfg.setOperadores(normalizeSet(cfg.getOperadores(), "operadores"));
+            cfg.setPuntuacion(normalizeSet(cfg.getPuntuacion(), "puntuacion"));
+            cfg.setAgrupacion(normalizeSet(cfg.getAgrupacion(), "agrupacion"));
+
+            cfg.validate();
             return cfg;
         }
+    }
+
+    private static Set<String> normalizeSet(Set<String> in, String name) {
+        Set<String> out = new LinkedHashSet<>();
+        Set<String> duplicates = new LinkedHashSet<>();
+        if (in != null) {
+            for (String s : in) {
+                String v = (s == null) ? "" : s.trim();
+                if (v.isEmpty()) {
+                    throw new IllegalArgumentException("La lista '" + name + "' contiene valores vacíos.");
+                }
+                if (!out.add(v)) {
+                    duplicates.add(v);
+                }
+            }
+        }
+        if (!duplicates.isEmpty()) {
+            throw new IllegalArgumentException("La lista '" + name + "' tiene valores duplicados: " + duplicates);
+        }
+        return out;
     }
 }
