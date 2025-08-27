@@ -57,12 +57,33 @@ public class FileController {
         Path path = chooseOpenFile(mainWindow);
         if (path == null)
             return; // usuario canceló
-        try {
-            loadFromPath(path);
-            info("Archivo abierto", path.toAbsolutePath().toString());
-        } catch (IOException e) {
-            showIoError(e, "Error al abrir el archivo");
-        }
+        SwingWorker<String, Void> worker = new SwingWorker<>() {
+            @Override
+            protected String doInBackground() throws Exception {
+                return loadFromPath(path);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    String text = get();
+                    SwingUtilities.invokeLater(() -> {
+                        editorPanel.setEditorText(text);
+                        documentModel.setText(text);
+                        documentModel.setFilePath(path);
+                        documentModel.setDirty(false);
+                        updateWindowTitle();
+                        info("Archivo abierto", path.toAbsolutePath().toString());
+                    });
+                } catch (Exception e) {
+                    Throwable cause = e.getCause() == null ? e : e.getCause();
+                    IOException io = cause instanceof IOException ? (IOException) cause
+                            : new IOException(cause);
+                    SwingUtilities.invokeLater(() -> showIoError(io, "Error al abrir el archivo"));
+                }
+            }
+        };
+        worker.execute();
     }
 
     /**
@@ -74,12 +95,34 @@ public class FileController {
         if (current == null) {
             saveAsInteractive();
         } else {
-            try {
-                saveToPath(current);
-                info("Archivo guardado", current.toAbsolutePath().toString());
-            } catch (IOException e) {
-                showIoError(e, "Error al guardar el archivo");
-            }
+            final String text = editorPanel.getEditorText();
+            SwingWorker<Void, Void> worker = new SwingWorker<>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    saveToPath(current, text);
+                    return null;
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        get();
+                        SwingUtilities.invokeLater(() -> {
+                            documentModel.setText(text);
+                            documentModel.setFilePath(current);
+                            documentModel.setDirty(false);
+                            updateWindowTitle();
+                            info("Archivo guardado", current.toAbsolutePath().toString());
+                        });
+                    } catch (Exception e) {
+                        Throwable cause = e.getCause() == null ? e : e.getCause();
+                        IOException io = cause instanceof IOException ? (IOException) cause
+                                : new IOException(cause);
+                        SwingUtilities.invokeLater(() -> showIoError(io, "Error al guardar el archivo"));
+                    }
+                }
+            };
+            worker.execute();
         }
     }
 
@@ -91,8 +134,13 @@ public class FileController {
         Path target = chooseSaveFile(mainWindow);
         if (target == null)
             return; // cancelado
+        String text = editorPanel.getEditorText();
         try {
-            saveToPath(target);
+            saveToPath(target, text);
+            documentModel.setText(text);
+            documentModel.setFilePath(target);
+            documentModel.setDirty(false);
+            updateWindowTitle();
             info("Archivo guardado", target.toAbsolutePath().toString());
         } catch (IOException e) {
             showIoError(e, "Error al guardar el archivo");
@@ -105,31 +153,18 @@ public class FileController {
      * =====================================================================
      */
 
-    /** Carga desde {@code path}, actualiza modelo y vista. */
-    public void loadFromPath(Path path) throws IOException {
+    /** Carga desde {@code path} y devuelve el texto. */
+    public String loadFromPath(Path path) throws IOException {
         Objects.requireNonNull(path, "path");
-        String text = textLoader.load(path);
-        // Vista
-        editorPanel.setEditorText(text);
-        // Modelo
-        documentModel.setText(text);
-        documentModel.setFilePath(path);
-        documentModel.setDirty(false);
-        // (El resaltado en vivo, si existe un DocumentListener, se encargará solo.)
-    updateWindowTitle();
+        return textLoader.load(path);
     }
 
-    /** Guarda en {@code path} el contenido del editor y sincroniza el modelo. */
-    public void saveToPath(Path path) throws IOException {
+    /** Guarda {@code text} en {@code path}. */
+    public void saveToPath(Path path, String text) throws IOException {
         Objects.requireNonNull(path, "path");
+        Objects.requireNonNull(text, "text");
         ensureParentDirectory(path);
-        String text = editorPanel.getEditorText();
         textSaver.save(path, text);
-        // Modelo
-        documentModel.setText(text);
-        documentModel.setFilePath(path);
-        documentModel.setDirty(false);
-    updateWindowTitle();
     }
 
     /**
