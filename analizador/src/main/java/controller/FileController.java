@@ -188,7 +188,15 @@ public class FileController {
         fc.setDialogTitle("Guardar texto de entrada");
         fc.setSelectedFile(new java.io.File("entrada.txt"));
         int op = fc.showSaveDialog(parent);
-        return op == JFileChooser.APPROVE_OPTION ? fc.getSelectedFile().toPath() : null;
+        if (op != JFileChooser.APPROVE_OPTION)
+            return null;
+        Path path = fc.getSelectedFile().toPath();
+        if (Files.exists(path)) {
+            int confirm = JOptionPane.showConfirmDialog(parent, "El archivo ya existe. ¿Desea sobrescribirlo?", "Confirmar sobrescritura", JOptionPane.YES_NO_OPTION);
+            if (confirm != JOptionPane.YES_OPTION)
+                return null;
+        }
+        return path;
     }
 
     private static void ensureParentDirectory(Path file) throws IOException {
