@@ -273,6 +273,19 @@ public class SearchPanel extends javax.swing.JPanel {
     }
 
     /**
+     * Habilita o deshabilita los controles de búsqueda mientras se ejecuta
+     * una operación en background.
+     */
+    public void setControlsEnabled(boolean enabled) {
+        txtQuery.setEnabled(enabled);
+        btnBuscar.setEnabled(enabled);
+        btnAnterior.setEnabled(enabled);
+        btnSiguiente.setEnabled(enabled);
+        chkIgnorarMayus.setEnabled(enabled);
+        chkPalabraCompleta.setEnabled(enabled);
+    }
+
+    /**
      * Bindings de handlers externos (Controller).
      */
     public void setOnSearch(Runnable onSearch) {
