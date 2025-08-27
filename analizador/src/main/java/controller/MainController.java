@@ -194,7 +194,7 @@ public final class MainController {
 
     private ActionListener showAbout() {
         return e -> JOptionPane.showMessageDialog(mainWindow,
-                "Analizador léxico – Ejemplo de integración completa\nAutor: (Tu nombre)",
+                "Analizador léxico \nAutor: AaronGLS \nVersión: 1.0",
                 "Acerca de", JOptionPane.INFORMATION_MESSAGE);
     }
 
