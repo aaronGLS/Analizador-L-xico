@@ -405,6 +405,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="ej.: //"/>
                 <Property name="toolTipText" type="java.lang.String" value="Prefijo para comentario de una l&#xed;nea (puede tener varios caracteres)"/>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[80, 30]"/>
+                </Property>
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -432,6 +435,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="ej.: /*"/>
                 <Property name="toolTipText" type="java.lang.String" value="Delimitadores del comentario de bloque; deben ser distintos."/>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[80, 30]"/>
+                </Property>
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">
@@ -459,6 +465,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="ej.: */"/>
                 <Property name="toolTipText" type="java.lang.String" value="Delimitadores del comentario de bloque; deben ser distintos."/>
+                <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+                  <Dimension value="[80, 30]"/>
+                </Property>
               </Properties>
               <Constraints>
                 <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout" value="org.netbeans.modules.form.compat2.layouts.DesignGridBagLayout$GridBagConstraintsDescription">

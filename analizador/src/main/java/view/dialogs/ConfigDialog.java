@@ -746,6 +746,7 @@ public class ConfigDialog extends javax.swing.JDialog {
         txtLinea.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         txtLinea.setText("ej.: //");
         txtLinea.setToolTipText("Prefijo para comentario de una línea (puede tener varios caracteres)");
+        txtLinea.setPreferredSize(new java.awt.Dimension(80, 30));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 0;
@@ -761,6 +762,7 @@ public class ConfigDialog extends javax.swing.JDialog {
         txtBloqueInicio.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         txtBloqueInicio.setText("ej.: /*");
         txtBloqueInicio.setToolTipText("Delimitadores del comentario de bloque; deben ser distintos.");
+        txtBloqueInicio.setPreferredSize(new java.awt.Dimension(80, 30));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 2;
@@ -776,6 +778,7 @@ public class ConfigDialog extends javax.swing.JDialog {
         txtBloqueFin.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         txtBloqueFin.setText("ej.: */");
         txtBloqueFin.setToolTipText("Delimitadores del comentario de bloque; deben ser distintos.");
+        txtBloqueFin.setPreferredSize(new java.awt.Dimension(80, 30));
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
         gridBagConstraints.gridy = 4;

@@ -5,7 +5,9 @@
     "ENTONCES",
     "entonces",
     "PARA",
-    "para"
+    "para",
+    "Nuevo",
+    "fin"
   ],
   "operadores": [
     "+",
@@ -30,7 +32,7 @@
     "}"
   ],
   "comentarios": {
-    "linea": "/",
+    "linea": "//",
     "bloqueInicio": "/*",
     "bloqueFin": "*/"
   }

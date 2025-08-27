@@ -44,7 +44,6 @@ C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\model\r
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\io\TextSaver.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\lexing\stream\CharCursor.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\model\report\ErrorRow.java
-C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\highlight\SyntaxClassifier.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\lexing\recognizer\OperatorRecognizer.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\view\components\SearchPanel.java
 C:\Users\aaron\Desktop\Tareas Progra\analizador\analizador\src\main\java\core\lexing\recognizer\PunctuationRecognizer.java
