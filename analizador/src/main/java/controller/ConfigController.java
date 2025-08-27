@@ -6,6 +6,8 @@ import view.dialogs.ConfigDialog;
 import core.io.ConfigLoader;
 import core.io.ConfigSaver;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
@@ -108,6 +110,10 @@ public class ConfigController {
         // 4) Persistir
         try {
             configSaver.save(configPath, config);
+        } catch (IllegalArgumentException ex) {
+            JOptionPane.showMessageDialog(parent, ex.getMessage(),
+                    "Configuración inválida", JOptionPane.ERROR_MESSAGE);
+            return;
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(parent,
@@ -116,13 +122,27 @@ public class ConfigController {
             return;
         }
 
-        // 5) (Opcional) Recargar desde disco si tu implementación así lo requiere
+        // 5) Verificar leyendo de nuevo desde disco
         try {
             Config reloaded = configLoader.load(configPath);
+            Gson g = new GsonBuilder()
+                    .setPrettyPrinting()
+                    .disableHtmlEscaping()
+                    .create();
+            if (!g.toJson(reloaded).equals(g.toJson(config))) {
+                JOptionPane.showMessageDialog(parent,
+                        "Error al verificar el guardado: el contenido difiere del esperado.",
+                        "Error de guardado", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             // Copiar de vuelta al objeto vivo para no romper referencias
             copyInto(config, reloaded);
-        } catch (Exception ignore) {
-            // Si tu implementación no necesita recargar, se puede omitir.
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(parent,
+                    "No se pudo verificar la configuración guardada: " + e.getMessage(),
+                    "Error de guardado", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
         // 6) Notificar a la aplicación para reflejar cambios (resaltado / re-análisis)

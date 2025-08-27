@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * Guardador de la configuración hacia un archivo JSON (config.json).
@@ -37,12 +38,29 @@ public final class ConfigSaver {
         cfg.validate(); // valida presencia de secciones obligatorias
 
         // Asegura la existencia del directorio padre
-        if (path.getParent() != null) {
-            Files.createDirectories(path.getParent());
+        Path dir = path.getParent();
+        if (dir != null) {
+            Files.createDirectories(dir);
         }
 
-        try (BufferedWriter bw = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-            gson.toJson(cfg, bw);
+        String json = gson.toJson(cfg);
+        Path temp = (dir != null)
+                ? Files.createTempFile(dir, "config", ".tmp")
+                : Files.createTempFile("config", ".tmp");
+        try {
+            try (BufferedWriter bw = Files.newBufferedWriter(temp, StandardCharsets.UTF_8)) {
+                bw.write(json);
+            }
+            Files.move(temp, path,
+                    StandardCopyOption.ATOMIC_MOVE,
+                    StandardCopyOption.REPLACE_EXISTING);
+
+            String readBack = Files.readString(path, StandardCharsets.UTF_8);
+            if (!json.equals(readBack)) {
+                throw new IOException("La configuración escrita difiere de la esperada.");
+            }
+        } finally {
+            Files.deleteIfExists(temp);
         }
     }
 }
