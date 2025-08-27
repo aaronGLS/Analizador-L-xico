@@ -3,6 +3,10 @@ package model.config;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import core.lexing.policy.AlphabetPolicy;
+import core.lexing.stream.CharCursor;
+import core.lexing.table.OperatorTable;
+
 /**
  * Configuración dinámica cargada desde config.json.
  *
@@ -73,6 +77,22 @@ public final class Config {
             throw new IllegalArgumentException("Las secciones palabrasReservadas, operadores, puntuacion y agrupacion son obligatorias.");
         }
 
+        // Normalizar y validar contenido básico de los conjuntos
+        palabrasReservadas = trimAndCheck("palabrasReservadas", palabrasReservadas);
+        operadores       = trimAndCheck("operadores",       operadores);
+        puntuacion       = trimAndCheck("puntuacion",       puntuacion);
+        agrupacion       = trimAndCheck("agrupacion",       agrupacion);
+
+        AlphabetPolicy policy = new AlphabetPolicy();
+        OperatorTable opTable = new OperatorTable(operadores);
+        OperatorTable punctTable = new OperatorTable(puntuacion);
+        OperatorTable groupTable = new OperatorTable(agrupacion);
+
+        checkAlphabet("palabrasReservadas", palabrasReservadas, policy, opTable, punctTable, groupTable);
+        checkAlphabet("operadores", operadores, policy, opTable, punctTable, groupTable);
+        checkAlphabet("puntuacion", puntuacion, policy, opTable, punctTable, groupTable);
+        checkAlphabet("agrupacion", agrupacion, policy, opTable, punctTable, groupTable);
+
          // Asegurarse de que operadores, puntuacion y agrupacion no tengan símbolos duplicados entre sí.
         Set<String> duplicates = new LinkedHashSet<>();
 
@@ -90,6 +110,44 @@ public final class Config {
 
         if (!duplicates.isEmpty()) {
             throw new IllegalArgumentException("Símbolos duplicados entre operadores, puntuacion y agrupacion: " + duplicates);
+        }
+    }
+
+    /** Normaliza un conjunto: trim de cada elemento y verificación de vacío. */
+    private Set<String> trimAndCheck(String key, Set<String> values) {
+        Set<String> cleaned = new LinkedHashSet<>();
+        for (String v : values) {
+            String t = (v == null) ? "" : v.trim();
+            if (t.isEmpty()) {
+                throw new IllegalArgumentException("Elemento vacío en '" + key + "': '" + v + "'");
+            }
+            cleaned.add(t);
+        }
+        return cleaned;
+    }
+
+    /** Verifica que cada símbolo del conjunto pertenezca al alfabeto permitido. */
+    private void checkAlphabet(String key,
+                               Set<String> values,
+                               AlphabetPolicy policy,
+                               OperatorTable opTable,
+                               OperatorTable punctTable,
+                               OperatorTable groupTable) {
+        for (String s : values) {
+            CharCursor cursor = new CharCursor(s);
+            while (!cursor.eof()) {
+                if (!policy.isAllowedAt(cursor, this, opTable, punctTable, groupTable)) {
+                    throw new IllegalArgumentException("Símbolo fuera del alfabeto en '" + key + "': '" + s + "'");
+                }
+                String match = opTable.longestMatch(cursor);
+                if (match == null) match = punctTable.longestMatch(cursor);
+                if (match == null) match = groupTable.longestMatch(cursor);
+                if (match != null) {
+                    for (int i = 0; i < match.length(); i++) cursor.next();
+                } else {
+                    cursor.next();
+                }
+            }
         }
     }
 }
