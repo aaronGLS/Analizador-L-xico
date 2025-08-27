@@ -39,4 +39,28 @@ public class LexerEngineTest {
         assertEquals("@", t.lexema());
         assertEquals(1, res.errors().size());
     }
+
+    @Test
+    void stringCanContainLineCommentSymbols() throws Exception {
+        Config cfg = loadConfig();
+        LexerEngine lexer = new LexerEngine(cfg);
+        var res = lexer.analyze("\"//\"");
+        assertEquals(1, res.tokens().size());
+        var t = res.tokens().get(0);
+        assertEquals(TokenType.STRING, t.tipo());
+        assertEquals("\"//\"", t.lexema());
+        assertTrue(res.errors().isEmpty());
+    }
+
+    @Test
+    void stringCanContainBlockCommentSymbols() throws Exception {
+        Config cfg = loadConfig();
+        LexerEngine lexer = new LexerEngine(cfg);
+        var res = lexer.analyze("\"/* */\"");
+        assertEquals(1, res.tokens().size());
+        var t = res.tokens().get(0);
+        assertEquals(TokenType.STRING, t.tipo());
+        assertEquals("\"/* */\"", t.lexema());
+        assertTrue(res.errors().isEmpty());
+    }
 }

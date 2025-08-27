@@ -128,29 +128,9 @@ public final class LexerEngine {
                 continue;
             }
 
-            // 1) Comentarios (se IGNORAN; solo reportar error si bloque no cierra)
-            Recognition r = lineComment.recognize(cursor, config.getComentarios());
-            if (r.matched()) {
-                String lex = buildLexeme(cursor, r.length());
-                tokens.add(new Token(TokenType.COMMENT, lex, pos));
-                consume(cursor, r.length());
-                continue;
-            }
-            r = blockComment.recognize(cursor, config.getComentarios());
-            if (r.matched()) {
-                String lex = buildLexeme(cursor, r.length());
-                if (r.hasError()) {
-                    // Error: comentario de bloque no cerrado (consume hasta EOF según reconocedor)
-                    errors.add(recoveryPolicy.buildLexError(lex, pos, r.errorMessage()));
-                    tokens.add(new Token(TokenType.ERROR, lex, pos));
-                } else {
-                    tokens.add(new Token(TokenType.COMMENT, lex, pos));
-                }
-                consume(cursor, r.length());
-                continue;
-            }
+            Recognition r;
 
-            // 2) Cadenas
+            // 1) Cadenas
             r = stringRec.recognize(cursor);
             if (r.matched()) {
                 if (r.hasError()) {
@@ -168,6 +148,28 @@ public final class LexerEngine {
                     tokens.add(new Token(TokenType.STRING, lex, pos));
                     consume(cursor, r.length());
                 }
+                continue;
+            }
+
+            // 2) Comentarios (se IGNORAN; solo reportar error si bloque no cierra)
+            r = lineComment.recognize(cursor, config.getComentarios());
+            if (r.matched()) {
+                String lex = buildLexeme(cursor, r.length());
+                tokens.add(new Token(TokenType.COMMENT, lex, pos));
+                consume(cursor, r.length());
+                continue;
+            }
+            r = blockComment.recognize(cursor, config.getComentarios());
+            if (r.matched()) {
+                String lex = buildLexeme(cursor, r.length());
+                if (r.hasError()) {
+                    // Error: comentario de bloque no cerrado (consume hasta EOF según reconocedor)
+                    errors.add(recoveryPolicy.buildLexError(lex, pos, r.errorMessage()));
+                    tokens.add(new Token(TokenType.ERROR, lex, pos));
+                } else {
+                    tokens.add(new Token(TokenType.COMMENT, lex, pos));
+                }
+                consume(cursor, r.length());
                 continue;
             }
 
