@@ -154,10 +154,10 @@ public class ConfigController {
     }
 
     private static void applyDialogToConfig(ConfigDialog dialog, Config cfg) {
-        List<String> reservadas = normalizeList(dialog.getReservadas());
-        List<String> operadores = normalizeList(dialog.getOperadores());
-        List<String> puntuacion = normalizeList(dialog.getPuntuacion());
-        List<String> agrupacion = normalizeList(dialog.getAgrupacion());
+        List<String> reservadas = normalizeList(dialog.getReservadas(), "palabras reservadas");
+        List<String> operadores = normalizeList(dialog.getOperadores(), "operadores");
+        List<String> puntuacion = normalizeList(dialog.getPuntuacion(), "puntuación");
+        List<String> agrupacion = normalizeList(dialog.getAgrupacion(), "agrupación");
 
         String linea = safeTrim(dialog.getComentarioLinea());
         String bloqueIni = safeTrim(dialog.getComentarioBloqueInicio());
@@ -189,14 +189,22 @@ public class ConfigController {
         cfg.setComentarios(cc);
     }
 
-    private static List<String> normalizeList(List<String> in) {
+    private static List<String> normalizeList(List<String> in, String name) {
         if (in == null)
             return List.of();
-        Set<String> set = new LinkedHashSet<>(); // conserva orden e ignora duplicados
+        Set<String> set = new LinkedHashSet<>();
+        Set<String> duplicates = new LinkedHashSet<>();
         for (String s : in) {
             String v = safeTrim(s);
-            if (v != null && !v.isEmpty())
-                set.add(v);
+            if (v == null || v.isEmpty()) {
+                throw new IllegalArgumentException("La lista '" + name + "' contiene valores vacíos.");
+            }
+            if (!set.add(v)) {
+                duplicates.add(v);
+            }
+        }
+        if (!duplicates.isEmpty()) {
+            throw new IllegalArgumentException("La lista '" + name + "' tiene valores duplicados: " + duplicates);
         }
         return new ArrayList<>(set);
     }
