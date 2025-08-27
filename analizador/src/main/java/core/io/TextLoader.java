@@ -16,9 +16,9 @@ import java.nio.file.Path;
  *
  * Decisiones:
  *  - Se utiliza UTF-8.
- *  - Se lee carácter por carácter en bloques (char[]) para preservar exactamente el contenido,
- *    incluyendo saltos de línea tal cual existan en el archivo.
- *  - Sin lógica adicional de normalización ni análisis (no corresponde a esta rama).
+ *  - Se lee carácter por carácter en bloques (char[]) para preservar el contenido del archivo.
+ *  - Se normalizan los saltos de línea: las secuencias \r\n y \r se reemplazan por \n.
+ *  - Sin lógica adicional de análisis (no corresponde a esta rama).
  *
  * Errores:
  *  - Lanza IOException en problemas de E/S.
@@ -42,7 +42,7 @@ public final class TextLoader {
             throw new IllegalArgumentException("El archivo no existe, no es regular o no es legible: " + path);
         }
 
-        // Lectura por bloques (mantiene exactamente los caracteres del archivo).
+        // Lectura por bloques (mantiene el contenido del archivo).
         StringBuilder sb = new StringBuilder();
         try (Reader reader = new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8)) {
             char[] buffer = new char[8192];
@@ -51,6 +51,8 @@ public final class TextLoader {
                 sb.append(buffer, 0, n);
             }
         }
-        return sb.toString();
+
+        String content = sb.toString();
+        return content.replace("\r\n", "\n").replace("\r", "\n");
     }
 }
