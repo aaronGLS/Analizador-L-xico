@@ -2,6 +2,7 @@ package core.io;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import model.config.Config;
 
 import java.io.BufferedReader;
@@ -30,7 +31,12 @@ public final class ConfigLoader {
      */
     public Config load(Path path) throws IOException {
         try (BufferedReader br = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
-            Config cfg = gson.fromJson(br, Config.class);
+            Config cfg;
+            try {
+                cfg = gson.fromJson(br, Config.class);
+            } catch (JsonSyntaxException e) {
+                throw new IllegalArgumentException("config.json inválido: " + e.getMessage(), e);
+            }
             if (cfg == null) {
                 throw new IllegalArgumentException("El archivo de configuración está vacío o es inválido.");
             }
@@ -42,6 +48,8 @@ public final class ConfigLoader {
 
             cfg.validate();
             return cfg;
+        } catch (IOException e) {
+            throw new IOException("Error al leer config.json: " + e.getMessage(), e);
         }
     }
 
