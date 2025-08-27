@@ -155,10 +155,16 @@ public final class MainController {
 
     private void wireMenuActions() {
         // Archivo
-        mainWindow.getMiNuevo().addActionListener(e -> newDocument());
+        mainWindow.getMiNuevo().addActionListener(e -> {
+            if (fileController.confirmSaveIfDirty()) {
+                newDocument();
+            }
+        });
         mainWindow.getMiAbrir().addActionListener(e -> {
-            fileController.openInteractive();
-            highlightEditor();
+            if (fileController.confirmSaveIfDirty()) {
+                fileController.openInteractive();
+                highlightEditor();
+            }
         });
         mainWindow.getMiGuardar().addActionListener(e -> fileController.saveInteractive());
         mainWindow.getMiGuardarComo().addActionListener(e -> fileController.saveAsInteractive());

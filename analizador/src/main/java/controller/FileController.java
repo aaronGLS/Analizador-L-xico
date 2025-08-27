@@ -147,6 +147,34 @@ public class FileController {
         }
     }
 
+    /**
+     * Si el documento tiene cambios sin guardar, pregunta al usuario si desea
+     * guardarlo antes de continuar.
+     *
+     * @return {@code true} si se puede continuar con la operación solicitada,
+     *         {@code false} si el usuario cancela.
+     */
+    public boolean confirmSaveIfDirty() {
+        if (!documentModel.isDirty())
+            return true;
+        Object[] options = { "Guardar", "No", "Cancelar" };
+        int op = JOptionPane.showOptionDialog(mainWindow,
+                "El documento actual tiene cambios sin guardar. ¿Desea guardarlo?",
+                "Guardar cambios",
+                JOptionPane.YES_NO_CANCEL_OPTION,
+                JOptionPane.WARNING_MESSAGE,
+                null,
+                options,
+                options[0]);
+        if (op == JOptionPane.CANCEL_OPTION || op == JOptionPane.CLOSED_OPTION) {
+            return false;
+        }
+        if (op == JOptionPane.YES_OPTION) {
+            saveInteractive();
+        }
+        return true;
+    }
+
     /*
      * =====================================================================
      * Operaciones puras (sin diálogos): útiles para pruebas o flujos custom
@@ -173,7 +201,7 @@ public class FileController {
      */
     public void markDirtyFromEditorChange() {
         documentModel.setDirty(true);
-    updateWindowTitle();
+        updateWindowTitle();
     }
 
     private static Path chooseOpenFile(Component parent) {
