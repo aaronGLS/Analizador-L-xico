@@ -30,7 +30,7 @@
     "}"
   ],
   "comentarios": {
-    "linea": "//",
+    "linea": "/",
     "bloqueInicio": "/*",
     "bloqueFin": "*/"
   }
