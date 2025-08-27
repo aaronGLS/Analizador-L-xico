@@ -184,7 +184,9 @@ public class FileController {
     /** Carga desde {@code path} y devuelve el texto. */
     public String loadFromPath(Path path) throws IOException {
         Objects.requireNonNull(path, "path");
-        return textLoader.load(path);
+        String text = textLoader.load(path);
+        SwingUtilities.invokeLater(this::updateWindowTitle);
+        return text;
     }
 
     /** Guarda {@code text} en {@code path}. */
@@ -193,6 +195,7 @@ public class FileController {
         Objects.requireNonNull(text, "text");
         ensureParentDirectory(path);
         textSaver.save(path, text);
+        SwingUtilities.invokeLater(this::updateWindowTitle);
     }
 
     /**
@@ -240,6 +243,7 @@ public class FileController {
             String base = "Analizador léxico"; // título base de la app
             String filePathStr = path == null ? null : path.toAbsolutePath().toString();
             mainWindow.updateWindowTitle(base, filePathStr, documentModel.isDirty());
+            mainWindow.getMiGuardar().setEnabled(documentModel.isDirty());
         } catch (Exception ignore) {
             // Silencioso: no todos los tests/mock de vista implementarán updateWindowTitle.
         }
