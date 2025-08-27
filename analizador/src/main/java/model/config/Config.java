@@ -72,6 +72,24 @@ public final class Config {
         if (palabrasReservadas == null || operadores == null || puntuacion == null || agrupacion == null) {
             throw new IllegalArgumentException("Las secciones palabrasReservadas, operadores, puntuacion y agrupacion son obligatorias.");
         }
-        // No se exige en la guía que estén “no vacías”, por lo que no forzamos tamaños.
+
+         // Asegurarse de que operadores, puntuacion y agrupacion no tengan símbolos duplicados entre sí.
+        Set<String> duplicates = new LinkedHashSet<>();
+
+        Set<String> intersection = new LinkedHashSet<>(operadores);
+        intersection.retainAll(puntuacion);
+        duplicates.addAll(intersection);
+
+        intersection = new LinkedHashSet<>(operadores);
+        intersection.retainAll(agrupacion);
+        duplicates.addAll(intersection);
+
+        intersection = new LinkedHashSet<>(puntuacion);
+        intersection.retainAll(agrupacion);
+        duplicates.addAll(intersection);
+
+        if (!duplicates.isEmpty()) {
+            throw new IllegalArgumentException("Símbolos duplicados entre operadores, puntuacion y agrupacion: " + duplicates);
+        }
     }
 }
