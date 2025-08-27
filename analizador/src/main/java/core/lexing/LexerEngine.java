@@ -114,16 +114,15 @@ public final class LexerEngine {
                 continue;
             }
 
-            // Posición e índice de inicio del posible lexema
+            // Posición de inicio del posible lexema
             Position pos = cursor.position();
-            int startIndex = cursor.index();
 
             // Delimitador de cierre de bloque sin apertura
             String blockEnd = config.getComentarios() != null ? config.getComentarios().getBloqueFin() : null;
             if (blockEnd != null && startsWith(cursor, blockEnd)) {
                 String lex = buildLexeme(cursor, blockEnd.length());
-                errors.add(recoveryPolicy.buildLexError(text, startIndex, blockEnd.length(), pos,
-                        "Delimitador de cierre de bloque sin apertura", null));
+                errors.add(recoveryPolicy.buildLexError(lex, pos,
+                        "Delimitador de cierre de bloque sin apertura"));
                 tokens.add(new Token(TokenType.ERROR, lex, pos));
                 consume(cursor, blockEnd.length());
                 continue;
@@ -142,7 +141,7 @@ public final class LexerEngine {
                 String lex = buildLexeme(cursor, r.length());
                 if (r.hasError()) {
                     // Error: comentario de bloque no cerrado (consume hasta EOF según reconocedor)
-                    errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), r.errorLexeme()));
+                    errors.add(recoveryPolicy.buildLexError(lex, pos, r.errorMessage()));
                     tokens.add(new Token(TokenType.ERROR, lex, pos));
                 } else {
                     tokens.add(new Token(TokenType.COMMENT, lex, pos));
@@ -161,7 +160,7 @@ public final class LexerEngine {
                         lexemeLen = Math.max(0, consumeLen - 1);
                     }
                     String lex = buildLexeme(cursor, lexemeLen);
-                    errors.add(recoveryPolicy.buildLexError(text, startIndex, lexemeLen, pos, r.errorMessage(), r.errorLexeme()));
+                    errors.add(recoveryPolicy.buildLexError(lex, pos, r.errorMessage()));
                     tokens.add(new Token(TokenType.ERROR, lex, pos));
                     consume(cursor, consumeLen);
                 } else {
@@ -177,7 +176,7 @@ public final class LexerEngine {
             if (r.matched()) {
                 if (r.hasError()) {
                     String lex = buildLexeme(cursor, r.length());
-                    errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), null));
+                    errors.add(recoveryPolicy.buildLexError(lex, pos, r.errorMessage()));
                     tokens.add(new Token(TokenType.ERROR, lex, pos));
                     consume(cursor, r.length());
                 } else {
@@ -193,7 +192,7 @@ public final class LexerEngine {
             if (r.matched()) {
                 if (r.hasError()) {
                     String lex = buildLexeme(cursor, r.length());
-                    errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), null));
+                    errors.add(recoveryPolicy.buildLexError(lex, pos, r.errorMessage()));
                     tokens.add(new Token(TokenType.ERROR, lex, pos));
                     consume(cursor, r.length());
                 } else {

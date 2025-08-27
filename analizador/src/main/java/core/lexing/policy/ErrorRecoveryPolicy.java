@@ -15,29 +15,18 @@ import model.lexical.Position;
 public final class ErrorRecoveryPolicy {
 
     /**
-     * Construye un LexError con el fragmento de texto que produjo el error.
+     * Construye un {@link LexError} usando directamente el lexema ya preparado.
      *
-     * @param sourceText  texto completo (no null)
-     * @param startIndex  índice 0-based del inicio del lexema con error
-     * @param length      longitud a tomar desde startIndex (acotada al tamaño del texto)
-     * @param position    posición 1-based (línea/columna) del inicio del lexema
-     * @param message     mensaje de error en español (no null)
-     * @param fallbackLexeme si no es posible tomar el substring (o length<=0), usar este valor (puede ser null)
-     * @return LexError con "símbolo o cadena de error", posición y mensaje
+     * @param lexeme   lexema que ocasionó el error (puede ser null)
+     * @param position posición 1-based (línea/columna) del inicio del lexema
+     * @param message  mensaje de error en español (no null)
+     * @return instancia de {@link LexError}
      */
-    public LexError buildLexError(String sourceText, int startIndex, int length,
-                                  Position position, String message, String fallbackLexeme) {
-        if (sourceText == null) throw new IllegalArgumentException("sourceText no puede ser null.");
+    public LexError buildLexError(String lexeme, Position position, String message) {
         if (position == null) throw new IllegalArgumentException("position no puede ser null.");
         if (message == null) throw new IllegalArgumentException("message no puede ser null.");
 
-        String lexema;
-        if (length > 0 && startIndex >= 0 && startIndex < sourceText.length()) {
-            int end = Math.min(sourceText.length(), startIndex + length);
-            lexema = sourceText.substring(startIndex, end);
-        } else {
-            lexema = (fallbackLexeme != null) ? fallbackLexeme : "";
-        }
-        return new LexError(lexema, position, message);
+        String lex = (lexeme != null) ? lexeme : "";
+        return new LexError(lex, position, message);
     }
 }
