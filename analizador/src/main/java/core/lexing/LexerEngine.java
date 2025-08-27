@@ -121,7 +121,7 @@ public final class LexerEngine {
             // Delimitador de cierre de bloque sin apertura
             String blockEnd = config.getComentarios() != null ? config.getComentarios().getBloqueFin() : null;
             if (blockEnd != null && startsWith(cursor, blockEnd)) {
-                String lex = substringSafe(text, startIndex, blockEnd.length());
+                String lex = buildLexeme(cursor, blockEnd.length());
                 errors.add(recoveryPolicy.buildLexError(text, startIndex, blockEnd.length(), pos,
                         "Delimitador de cierre de bloque sin apertura", null));
                 tokens.add(new Token(TokenType.ERROR, lex, pos));
@@ -132,14 +132,14 @@ public final class LexerEngine {
             // 1) Comentarios (se IGNORAN; solo reportar error si bloque no cierra)
             Recognition r = lineComment.recognize(cursor, config.getComentarios());
             if (r.matched()) {
-                String lex = substringSafe(text, startIndex, r.length());
+                String lex = buildLexeme(cursor, r.length());
                 tokens.add(new Token(TokenType.COMMENT, lex, pos));
                 consume(cursor, r.length());
                 continue;
             }
             r = blockComment.recognize(cursor, config.getComentarios());
             if (r.matched()) {
-                String lex = substringSafe(text, startIndex, r.length());
+                String lex = buildLexeme(cursor, r.length());
                 if (r.hasError()) {
                     // Error: comentario de bloque no cerrado (consume hasta EOF según reconocedor)
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), r.errorLexeme()));
@@ -160,7 +160,7 @@ public final class LexerEngine {
                     if (StringRecognizer.MSG_SIMBOLO_INVALIDO.equals(r.errorMessage())) {
                         lexemeLen = Math.max(0, consumeLen - 1);
                     }
-                    String lex = substringSafe(text, startIndex, lexemeLen);
+                    String lex = buildLexeme(cursor, lexemeLen);
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, lexemeLen, pos, r.errorMessage(), r.errorLexeme()));
                     tokens.add(new Token(TokenType.ERROR, lex, pos));
                     consume(cursor, consumeLen);
@@ -176,7 +176,7 @@ public final class LexerEngine {
             r = decimalRec.recognize(cursor);
             if (r.matched()) {
                 if (r.hasError()) {
-                    String lex = substringSafe(text, startIndex, r.length());
+                    String lex = buildLexeme(cursor, r.length());
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), null));
                     tokens.add(new Token(TokenType.ERROR, lex, pos));
                     consume(cursor, r.length());
@@ -192,7 +192,7 @@ public final class LexerEngine {
             r = numberRec.recognize(cursor);
             if (r.matched()) {
                 if (r.hasError()) {
-                    String lex = substringSafe(text, startIndex, r.length());
+                    String lex = buildLexeme(cursor, r.length());
                     errors.add(recoveryPolicy.buildLexError(text, startIndex, r.length(), pos, r.errorMessage(), null));
                     tokens.add(new Token(TokenType.ERROR, lex, pos));
                     consume(cursor, r.length());
