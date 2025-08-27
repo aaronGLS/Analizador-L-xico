@@ -6,6 +6,9 @@ import view.dialogs.ConfigDialog;
 import core.io.ConfigLoader;
 import core.io.ConfigSaver;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
@@ -67,65 +70,79 @@ public class ConfigController {
      * =====================================================================
      */
 
-    /** Abre el diálogo de configuración, valida y persiste los cambios. */
+    /** Abre el diálogo de configuración y gestiona guardado/validación. */
     public void openDialogAndSave() {
-        // 1) Instanciar y precargar el diálogo
-        // Obtener Frame padre compatible con el constructor del diálogo
+        // Instanciar y precargar el diálogo
         Frame frameParent = JOptionPane.getFrameForComponent(parent);
         ConfigDialog dialog = new ConfigDialog(frameParent, true);
         preloadDialog(dialog, config);
 
-        // Flag para saber si el usuario aceptó (OK) o canceló
-        final boolean[] accepted = { false };
-        dialog.getBtnAceptar().addActionListener(e -> {
-            accepted[0] = true;
-            dialog.dispose();
-        });
-        dialog.getBtnCancelar().addActionListener(e -> {
-            accepted[0] = false;
-            dialog.dispose();
+        // Listeners para manipular listas con validación de duplicados
+        dialog.setOnAddReservada(() -> addItem(dialog.getLstReservadas(), "palabra reservada"));
+        dialog.setOnEditReservada(() -> editItem(dialog.getLstReservadas(), "palabra reservada"));
+        dialog.setOnAddOperador(() -> addItem(dialog.getLstOperadores(), "operador"));
+        dialog.setOnEditOperador(() -> editItem(dialog.getLstOperadores(), "operador"));
+        dialog.setOnAddPuntuacion(() -> addItem(dialog.getLstPuntuacion(), "signo de puntuación"));
+        dialog.setOnEditPuntuacion(() -> editItem(dialog.getLstPuntuacion(), "signo de puntuación"));
+        dialog.setOnAddAgrupacion(() -> addItem(dialog.getLstAgrupacion(), "símbolo de agrupación"));
+        dialog.setOnEditAgrupacion(() -> editItem(dialog.getLstAgrupacion(), "símbolo de agrupación"));
+
+        // Botones inferiores
+        dialog.getBtnCancelar().addActionListener(e -> dialog.dispose());
+        dialog.setOnAplicar(() -> saveConfig(dialog));
+        dialog.setOnAceptar(() -> {
+            if (saveConfig(dialog)) {
+                dialog.dispose();
+            }
         });
 
-        // 2) Mostrar de forma modal y esperar acción del usuario
+        // Mostrar de forma modal
         dialog.setLocationRelativeTo(parent);
         dialog.setVisible(true);
+    }
 
-        // Si el diálogo expone aceptación/cancelación, la consultamos.
-        // Si no, asumimos que cerrar equivale a cancelar cuando no hay cambios.
-        if (!accepted[0]) {
-            return; // usuario canceló
-        }
-
-        // 3) Recoger datos, normalizar y validar
+    /** Guarda la configuración actual del diálogo mostrando previsualización JSON. */
+    private boolean saveConfig(ConfigDialog dialog) {
+        Config temp = new Config();
         try {
-            applyDialogToConfig(dialog, config);
+            applyDialogToConfig(dialog, temp);
         } catch (IllegalArgumentException ex) {
             JOptionPane.showMessageDialog(parent, ex.getMessage(),
                     "Configuración inválida", JOptionPane.ERROR_MESSAGE);
-            return;
+            return false;
         }
 
-        // 4) Persistir
+        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+        String json = gson.toJson(temp);
+        JTextArea area = new JTextArea(json, 20, 60);
+        area.setEditable(false);
+        area.setLineWrap(true);
+        area.setWrapStyleWord(true);
+        int option = JOptionPane.showConfirmDialog(dialog, new JScrollPane(area),
+                "Previsualización JSON", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        if (option != JOptionPane.OK_OPTION) {
+            return false;
+        }
+
+        dialog.setEnabledWhileSaving(false);
         try {
-            configSaver.save(configPath, config);
+            configSaver.save(configPath, temp);
         } catch (IOException e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(parent,
                     "No se pudo guardar la configuración: " + e.getMessage(),
                     "Error de guardado", JOptionPane.ERROR_MESSAGE);
-            return;
+            dialog.setEnabledWhileSaving(true);
+            return false;
         }
 
-        // 5) (Opcional) Recargar desde disco si tu implementación así lo requiere
         try {
             Config reloaded = configLoader.load(configPath);
-            // Copiar de vuelta al objeto vivo para no romper referencias
             copyInto(config, reloaded);
         } catch (Exception ignore) {
-            // Si tu implementación no necesita recargar, se puede omitir.
         }
+        dialog.setEnabledWhileSaving(true);
 
-        // 6) Notificar a la aplicación para reflejar cambios (resaltado / re-análisis)
         if (onConfigChanged != null) {
             try {
                 onConfigChanged.run();
@@ -137,6 +154,72 @@ public class ConfigController {
         JOptionPane.showMessageDialog(parent,
                 "Configuración guardada correctamente.",
                 "Configuración", JOptionPane.INFORMATION_MESSAGE);
+        return true;
+    }
+
+    // ==== Helpers de edición de listas ====
+    private void addItem(JList<String> list, String nombre) {
+        DefaultListModel<String> model = castModel(list);
+        String val = JOptionPane.showInputDialog(parent, "Ingrese " + nombre + ":");
+        if (val == null) {
+            return; // cancelado
+        }
+        val = val.trim();
+        if (val.isEmpty()) {
+            JOptionPane.showMessageDialog(parent, "El valor no puede estar vacío.",
+                    "Entrada inválida", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (modelContains(model, val, -1)) {
+            JOptionPane.showMessageDialog(parent, "Valor duplicado: " + val,
+                    "Entrada duplicada", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        model.addElement(val);
+        list.setSelectedIndex(model.getSize() - 1);
+    }
+
+    private void editItem(JList<String> list, String nombre) {
+        DefaultListModel<String> model = castModel(list);
+        int idx = list.getSelectedIndex();
+        if (idx < 0) {
+            return;
+        }
+        String actual = model.get(idx);
+        String val = JOptionPane.showInputDialog(parent, "Editar " + nombre + ":", actual);
+        if (val == null) {
+            return;
+        }
+        val = val.trim();
+        if (val.isEmpty()) {
+            JOptionPane.showMessageDialog(parent, "El valor no puede estar vacío.",
+                    "Entrada inválida", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        if (modelContains(model, val, idx)) {
+            JOptionPane.showMessageDialog(parent, "Valor duplicado: " + val,
+                    "Entrada duplicada", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        model.set(idx, val);
+        list.setSelectedIndex(idx);
+    }
+
+    @SuppressWarnings("unchecked")
+    private DefaultListModel<String> castModel(JList<String> list) {
+        return (DefaultListModel<String>) list.getModel();
+    }
+
+    private boolean modelContains(DefaultListModel<String> model, String val, int ignoreIndex) {
+        for (int i = 0; i < model.size(); i++) {
+            if (i == ignoreIndex) {
+                continue;
+            }
+            if (model.get(i).equals(val)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void preloadDialog(ConfigDialog dialog, Config cfg) {
