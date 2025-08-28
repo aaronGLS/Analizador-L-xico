@@ -204,8 +204,16 @@ public final class MainController {
      */
     private void installEditorListeners() {
         // Dirty + stats
-        final Timer highlightTimer = new Timer(300, e -> highlightEditor());
-        highlightTimer.setRepeats(false);
+        final boolean[] highlightPending = new boolean[] { false };
+        final Timer highlightTimer = new Timer(100, e -> {
+            if (highlightPending[0]) {
+                highlightPending[0] = false;
+                highlightEditor();
+            } else {
+                ((Timer) e.getSource()).stop();
+            }
+        });
+        highlightTimer.setRepeats(true);
         editorPanel.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -219,13 +227,16 @@ public final class MainController {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                onChange();
+                // Ignorar cambios de estilo (evita bucle por setCharacterAttributes)
             }
 
             private void onChange() {
                 fileController.markDirtyFromEditorChange();
                 updateStats();
-                highlightTimer.restart();
+                highlightPending[0] = true;
+                if (!highlightTimer.isRunning()) {
+                    highlightTimer.start();
+                }
                 // Evitar resultados desactualizados en el panel de búsqueda:
                 // si el usuario modifica el texto base y hay una consulta activa,
                 // limpiar el panel de resultados (misma política que cuando la query está vacía).
@@ -245,8 +256,8 @@ public final class MainController {
     }
 
     private void updateStats() {
-        String text = editorPanel.getEditorText();
-        int chars = text.length();
+        // Evitar copia completa del texto en archivos grandes
+        int chars = editorPanel.getDocument().getLength();
         editorPanel.setStatusStatsText("Caracteres: " + chars);
     }
 
