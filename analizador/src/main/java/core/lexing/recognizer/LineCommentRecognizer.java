@@ -35,6 +35,14 @@ public final class LineCommentRecognizer {
             return Recognition.noMatch();
         }
 
+        int nextCh = cursor.peek(prefix.length());
+        if (nextCh != CharCursor.EOF) {
+            char last = prefix.charAt(prefix.length() - 1);
+            if ((char) nextCh == last) {
+                return Recognition.noMatch();
+            }
+        }
+
         // Calcula longitud: prefijo + contenido hasta antes del salto de línea/EOF.
         int offset = prefix.length();
 

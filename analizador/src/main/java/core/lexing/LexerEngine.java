@@ -173,6 +173,37 @@ public final class LexerEngine {
                 continue;
             }
 
+            // 2.5) Secuencias repetidas del MISMO operador (no definidas como multi-caracter) => ERROR
+            //    Ej.: "+++", "---", "***", "///" (cuando no es comentario de línea)
+            //    Regla: si el primer carácter es un operador válido individual y se repite consecutivamente,
+            //           y NO existe un operador definido exactamente con esa repetición, se reporta error
+            //           consumiendo toda la racha.
+            char firstCh = (char) cursor.peek();
+            if (firstCh != CharCursor.EOF) {
+                String firstSym = Character.toString(firstCh);
+                if (opTable.contains(firstSym)) {
+                    int run = 1;
+                    while (true) {
+                        int peeked = cursor.peek(run);
+                        if (peeked == CharCursor.EOF || (char) peeked != firstCh) break;
+                        run++;
+                    }
+                    if (run >= 2) {
+                        // ¿Existe un operador exactamente igual a la racha (p.ej. "==")?
+                        StringBuilder sb = new StringBuilder(run);
+                        for (int i = 0; i < run; i++) sb.append(firstCh);
+                        String repeated = sb.toString();
+                        if (!opTable.contains(repeated)) {
+                            String lex = buildLexeme(cursor, run);
+                            errors.add(recoveryPolicy.buildLexError(lex, pos, "Secuencia inválida de operador repetido"));
+                            tokens.add(new Token(TokenType.ERROR, lex, pos));
+                            consume(cursor, run);
+                            continue;
+                        }
+                    }
+                }
+            }
+
             // 3) Decimales (primero, para no confundir con enteros válidos)
             r = decimalRec.recognize(cursor);
             if (r.matched()) {
