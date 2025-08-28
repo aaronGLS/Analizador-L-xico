@@ -6,20 +6,26 @@ import model.lexical.Position;
  * Cursor de lectura carácter-a-carácter sobre un texto inmutable.
  *
  * Objetivo:
- *  - Proveer operaciones básicas de escaneo: peek(), peek(k), next(), eof().
- *  - Mantener posición 1-based (línea/columna) para reportes.
- *  - Tratar correctamente los saltos de línea: '\n', '\r' y la secuencia Windows "\r\n"
- *    como UN solo salto de línea a efectos de conteo.
+ * - Proveer operaciones básicas de escaneo: peek(), peek(k), next(), eof().
+ * - Mantener posición 1-based (línea/columna) para reportes.
+ * - Tratar correctamente los saltos de línea: '\n', '\r' y la secuencia Windows
+ * "\r\n"
+ * como UN solo salto de línea a efectos de conteo.
  *
  * Decisiones:
- *  - Retorna int en peek/next: -1 indica EOF; en caso contrario es el código del char.
- *  - La posición devuelta por position() corresponde SIEMPRE al próximo carácter a leer.
- *  - No realiza reconocimiento de patrones ni manipulación de cadenas; solo navegación.
+ * - Retorna int en peek/next: -1 indica EOF; en caso contrario es el código del
+ * char.
+ * - La posición devuelta por position() corresponde SIEMPRE al próximo carácter
+ * a leer.
+ * - No realiza reconocimiento de patrones ni manipulación de cadenas; solo
+ * navegación.
  *
  * Coherencia con la práctica:
- *  - La guía pide operar con chars (sin regex ni “helpers” de cadena) y reportar posiciones.
- *  - El alfabeto incluye espacio y salto de línea; aquí SOLO se contabilizan posiciones,
- *    la validación de alfabeto se hará en otra rama (p. ej., AlphabetPolicy).
+ * - La guía pide operar con chars (sin regex ni “helpers” de cadena) y reportar
+ * posiciones.
+ * - El alfabeto incluye espacio y salto de línea; aquí SOLO se contabilizan
+ * posiciones,
+ * la validación de alfabeto se hará en otra rama (p. ej., AlphabetPolicy).
  */
 public final class CharCursor {
 
@@ -41,6 +47,7 @@ public final class CharCursor {
 
     /**
      * Crea un cursor sobre el texto indicado.
+     * 
      * @param texto contenido inmutable a recorrer; no puede ser null
      */
     public CharCursor(CharSequence texto) {
@@ -60,21 +67,25 @@ public final class CharCursor {
 
     /**
      * Devuelve el código del próximo carácter sin consumirlo.
+     * 
      * @return código de carácter (0..65535) o EOF si no hay más.
      */
     public int peek() {
-        if (eof()) return EOF;
+        if (eof())
+            return EOF;
         return texto.charAt(index);
     }
 
     /**
      * Devuelve el código del carácter a una distancia k sin consumirlo.
+     * 
      * @param k desplazamiento (0 = mismo que peek())
      * @return código de carácter o EOF si está fuera de rango.
      */
     public int peek(int k) {
         int pos = index + k;
-        if (pos < 0 || pos >= length) return EOF;
+        if (pos < 0 || pos >= length)
+            return EOF;
         return texto.charAt(pos);
     }
 
@@ -86,7 +97,8 @@ public final class CharCursor {
      * @return código del carácter consumido o EOF si no hay más.
      */
     public int next() {
-        if (eof()) return EOF;
+        if (eof())
+            return EOF;
 
         int ch = texto.charAt(index++);
         // Actualización de posición
@@ -122,14 +134,25 @@ public final class CharCursor {
     }
 
     /** Línea actual (1-based) del siguiente carácter a leer. */
-    public int line() { return linea; }
+    public int line() {
+        return linea;
+    }
 
     /** Columna actual (1-based) del siguiente carácter a leer. */
-    public int column() { return columna; }
+    public int column() {
+        return columna;
+    }
 
-    /** Índice 0-based del siguiente carácter a leer (útil para estructuras auxiliares). */
-    public int index() { return index; }
+    /**
+     * Índice 0-based del siguiente carácter a leer (útil para estructuras
+     * auxiliares).
+     */
+    public int index() {
+        return index;
+    }
 
     /** Longitud total del texto subyacente. */
-    public int length() { return length; }
+    public int length() {
+        return length;
+    }
 }

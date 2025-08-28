@@ -8,18 +8,21 @@ import java.util.List;
  *
  * @param <T> Tipo de etiqueta de aceptación (p.ej., categoría).
  *
- * Uso:
- *   DfaBuilder<T> b = new DfaBuilder<>();
- *   int s0 = b.addState();
- *   int s1 = b.addState();
- *   b.onRange(s0, '0', '9', s1);
- *   b.setAccepting(s1, SOME_TAG);
- *   Dfa<T> dfa = b.build(s0);
+ *            Uso:
+ *            DfaBuilder<T> b = new DfaBuilder<>();
+ *            int s0 = b.addState();
+ *            int s1 = b.addState();
+ *            b.onRange(s0, '0', '9', s1);
+ *            b.setAccepting(s1, SOME_TAG);
+ *            Dfa<T> dfa = b.build(s0);
  *
- * Filosofía:
- *  - Núcleo mínimo: estados, transiciones por char/rango/set, marca de aceptación.
- *  - Sin validaciones pesadas (p.ej., detección de solapamientos); mantener simple.
- *  - El determinismo se garantiza por construcción del usuario del builder.
+ *            Filosofía:
+ *            - Núcleo mínimo: estados, transiciones por char/rango/set, marca
+ *            de aceptación.
+ *            - Sin validaciones pesadas (p.ej., detección de solapamientos);
+ *            mantener simple.
+ *            - El determinismo se garantiza por construcción del usuario del
+ *            builder.
  */
 public final class DfaBuilder<T> {
 
@@ -47,7 +50,10 @@ public final class DfaBuilder<T> {
         return this;
     }
 
-    /** Agrega una transición por rango inclusivo [start..end] desde 'from' hacia 'to'. */
+    /**
+     * Agrega una transición por rango inclusivo [start..end] desde 'from' hacia
+     * 'to'.
+     */
     public DfaBuilder<T> onRange(int from, char start, char end, int to) {
         checkState(from);
         checkState(to);

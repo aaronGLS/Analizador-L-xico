@@ -7,22 +7,30 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * AFD (DFA) ejecutor: recorre el texto desde la posición actual de un {@link CharCursor}
- * y determina el prefijo aceptado MÁS LARGO (maximal munch) sin consumir del cursor.
+ * AFD (DFA) ejecutor: recorre el texto desde la posición actual de un
+ * {@link CharCursor}
+ * y determina el prefijo aceptado MÁS LARGO (maximal munch) sin consumir del
+ * cursor.
  *
- * @param <T> Tipo de etiqueta asociada a estados de aceptación (p.ej. categoría, nombre).
+ * @param <T> Tipo de etiqueta asociada a estados de aceptación (p.ej.
+ *            categoría, nombre).
  *
- * Comportamiento:
- *  - Inicia en el estado 'startState'.
- *  - Lee caracteres con cursor.peek(k) avanzando un desplazamiento local.
- *  - Si encuentra transición, pasa al siguiente estado y continúa.
- *  - Registra el último estado de aceptación alcanzado y la longitud hasta allí.
- *  - Se detiene cuando no hay transición aplicable o se alcanza EOF.
- *  - Devuelve un Match con: ¿hubo aceptación?, longitud y etiqueta del estado aceptado.
+ *            Comportamiento:
+ *            - Inicia en el estado 'startState'.
+ *            - Lee caracteres con cursor.peek(k) avanzando un desplazamiento
+ *            local.
+ *            - Si encuentra transición, pasa al siguiente estado y continúa.
+ *            - Registra el último estado de aceptación alcanzado y la longitud
+ *            hasta allí.
+ *            - Se detiene cuando no hay transición aplicable o se alcanza EOF.
+ *            - Devuelve un Match con: ¿hubo aceptación?, longitud y etiqueta
+ *            del estado aceptado.
  *
- * Importante:
- *  - NO consume del cursor (SRP). Quien llame decide cuántos caracteres consumir luego.
- *  - No hay minimización ni diagnósticos de no-determinismo aquí (núcleo mínimo).
+ *            Importante:
+ *            - NO consume del cursor (SRP). Quien llame decide cuántos
+ *            caracteres consumir luego.
+ *            - No hay minimización ni diagnósticos de no-determinismo aquí
+ *            (núcleo mínimo).
  */
 public final class Dfa<T> {
 
@@ -39,13 +47,22 @@ public final class Dfa<T> {
         }
 
         /** ¿Se reconoció algún prefijo válido? */
-        public boolean accepted() { return accepted; }
+        public boolean accepted() {
+            return accepted;
+        }
 
         /** Longitud del prefijo aceptado más largo. (0 si !accepted) */
-        public int length() { return length; }
+        public int length() {
+            return length;
+        }
 
-        /** Etiqueta del estado aceptado responsable del match (puede ser null si !accepted). */
-        public T acceptTag() { return acceptTag; }
+        /**
+         * Etiqueta del estado aceptado responsable del match (puede ser null si
+         * !accepted).
+         */
+        public T acceptTag() {
+            return acceptTag;
+        }
     }
 
     private final List<State<T>> states;
@@ -102,7 +119,8 @@ public final class Dfa<T> {
                     break; // determinista: la primera que matchee
                 }
             }
-            if (nextState < 0) break; // no hay transición aplicable
+            if (nextState < 0)
+                break; // no hay transición aplicable
 
             // Avanzamos localmente
             current = nextState;
