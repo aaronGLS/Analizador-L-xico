@@ -16,14 +16,25 @@ package model.lexical;
  *  - ERROR: fragmento que produjo un error léxico.
  */
 public enum TokenType {
-    IDENTIFIER,
-    NUMBER,
-    DECIMAL,
-    STRING,
-    RESERVED_WORD,
-    PUNCTUATION,
-    OPERATOR,
-    GROUPING,
-    COMMENT,
-    ERROR
+    IDENTIFIER("identificador"),
+    NUMBER("número"),
+    DECIMAL("decimal"),
+    STRING("cadena"),
+    RESERVED_WORD("palabra reservada"),
+    PUNCTUATION("puntuación"),
+    OPERATOR("operador"),
+    GROUPING("agrupación"),
+    COMMENT("comentario"),
+    ERROR("error");
+
+    private final String display;
+
+    TokenType(String display) {
+        this.display = display;
+    }
+
+    @Override
+    public String toString() {
+        return display;
+    }
 }

@@ -257,10 +257,10 @@ public final class AnalyzeController {
 
     private List<String> formatNotUsed(GeneralReport gr) {
         List<String> items = new ArrayList<>();
-        gr.reservadasNoUsadas().forEach(s -> items.add("[RESERVADA] " + s));
-        gr.operadoresNoUsados().forEach(s -> items.add("[OPERADOR] " + s));
-        gr.puntuacionNoUsada().forEach(s -> items.add("[PUNTUACION] " + s));
-        gr.agrupacionNoUsada().forEach(s -> items.add("[AGRUPACION] " + s));
+        gr.reservadasNoUsadas().forEach(s -> items.add("palabra reservada: " + s));
+        gr.operadoresNoUsados().forEach(s -> items.add("operador: " + s));
+        gr.puntuacionNoUsada().forEach(s -> items.add("puntuación: " + s));
+        gr.agrupacionNoUsada().forEach(s -> items.add("agrupación: " + s));
         return items;
     }
 

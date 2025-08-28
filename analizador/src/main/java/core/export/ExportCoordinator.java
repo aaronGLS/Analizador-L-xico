@@ -57,7 +57,7 @@ public final class ExportCoordinator {
 
         for (int i = 0; i < tokens.size(); i++) {
             Token t = tokens.get(i);
-            rows[i][0] = t.tipo().name();
+            rows[i][0] = t.tipo().toString();
             rows[i][1] = t.lexema();
             rows[i][2] = String.valueOf(t.posicion().linea());
             rows[i][3] = String.valueOf(t.posicion().columna());
@@ -79,7 +79,7 @@ public final class ExportCoordinator {
         for (int i = 0; i < countRows.size(); i++) {
             LexemeCountRow r = countRows.get(i);
             rows[i][0] = r.lexema();
-            rows[i][1] = r.tipo().name();
+            rows[i][1] = r.tipo().toString();
             rows[i][2] = String.valueOf(r.cantidad());
         }
         csvWriter.write(path, headers, rows);
