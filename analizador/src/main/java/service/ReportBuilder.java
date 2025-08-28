@@ -13,8 +13,8 @@ import model.report.TokenRow;
 
 /**
  * Construye las tablas que exige la práctica:
- *  - Si hay ERRORES: mostrar SOLO "Reporte de errores".
- *  - Si NO hay errores: mostrar "Tokens" y "Recuento de lexemas".
+ * - Si hay ERRORES: mostrar SOLO "Reporte de errores".
+ * - Si NO hay errores: mostrar "Tokens" y "Recuento de lexemas".
  *
  * Esta clase NO exporta ni formatea a CSV/HTML; solo arma las filas de datos.
  */
@@ -30,17 +30,26 @@ public final class ReportBuilder {
             this.tokens = tokens;
             this.recuento = recuento;
         }
-        public List<ErrorRow> errores() { return errores; }
-        public List<TokenRow> tokens() { return tokens; }
-        public List<LexemeCountRow> recuento() { return recuento; }
+
+        public List<ErrorRow> errores() {
+            return errores;
+        }
+
+        public List<TokenRow> tokens() {
+            return tokens;
+        }
+
+        public List<LexemeCountRow> recuento() {
+            return recuento;
+        }
     }
 
     private final StatsService statsService = new StatsService();
 
     /**
      * Regla de la guía:
-     *  - Si errors.size() > 0 ⇒ se muestra SOLO "Reporte de errores".
-     *  - Si errors.size() == 0 ⇒ se muestran "Tokens" y "Recuento de lexemas".
+     * - Si errors.size() > 0 ⇒ se muestra SOLO "Reporte de errores".
+     * - Si errors.size() == 0 ⇒ se muestran "Tokens" y "Recuento de lexemas".
      */
     public Result build(List<Token> tokens, List<LexError> errors) {
         Objects.requireNonNull(tokens, "tokens no puede ser null");
@@ -48,18 +57,25 @@ public final class ReportBuilder {
 
         if (!errors.isEmpty()) {
             return new Result(buildErrorRows(errors),
-                              List.of(),
-                              List.of());
+                    List.of(),
+                    List.of());
         }
-        // Sin errores: mostrar tokens y recuento
-        var tokenRows = buildTokenRows(tokens);
-        var countRows = statsService.countByLexemeAndType(tokens);
+        // Sin errores: mostrar tokens y recuento, EXCLUYENDO comentarios
+        List<Token> tokensSinComentarios = new ArrayList<>();
+        for (Token t : tokens) {
+            if (t.tipo() != model.lexical.TokenType.COMMENT) {
+                tokensSinComentarios.add(t);
+            }
+        }
+        var tokenRows = buildTokenRows(tokensSinComentarios);
+        var countRows = statsService.countByLexemeAndType(tokensSinComentarios);
         return new Result(List.of(), tokenRows, countRows);
     }
 
     /** Convierte la lista de errores a filas ErrorRow. */
     public List<ErrorRow> buildErrorRows(List<LexError> errors) {
-        if (errors == null || errors.isEmpty()) return List.of();
+        if (errors == null || errors.isEmpty())
+            return List.of();
         List<ErrorRow> rows = new ArrayList<>(errors.size());
         for (LexError e : errors) {
             rows.add(new ErrorRow(e.simboloOCadena(), e.posicion(), e.mensaje()));
@@ -69,7 +85,8 @@ public final class ReportBuilder {
 
     /** Convierte la lista de tokens a filas TokenRow. */
     public List<TokenRow> buildTokenRows(List<Token> tokens) {
-        if (tokens == null || tokens.isEmpty()) return List.of();
+        if (tokens == null || tokens.isEmpty())
+            return List.of();
         List<TokenRow> rows = new ArrayList<>(tokens.size());
         for (Token t : tokens) {
             rows.add(new TokenRow(t.tipo(), t.lexema(), t.posicion()));

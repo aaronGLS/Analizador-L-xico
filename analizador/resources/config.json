@@ -33,7 +33,7 @@
   ],
   "comentarios": {
     "linea": "//",
-    "bloqueInicio": "/*",
-    "bloqueFin": "*/"
+    "bloqueInicio": "*/",
+    "bloqueFin": "/*"
   }
 }
