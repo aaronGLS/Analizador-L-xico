@@ -1,0 +1,3 @@
+core\io\TextLoaderTest.class
+core\lexing\LexerEngineTest.class
+service\HighlightServiceTest.class
